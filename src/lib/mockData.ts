@@ -12,6 +12,7 @@ export type {
   Priority,
   ArtisanStatus,
   ProjectStatus,
+  BudgetRiskLevel,
   Project,
   Lot,
   Task,
@@ -29,9 +30,10 @@ export {
   taskStatusLabel,
   priorityLabel,
   artisanStatusLabel,
+  budgetRiskLevelLabel,
   documentCategoryLabel,
 } from "@/lib/mock/labels";
 
 export { projects, lots, tasks, artisans, documents, notes, alerts } from "@/lib/mock/data";
 
-export { RESERVE, getProjectStats } from "@/lib/mock/stats";
+export { RESERVE, getProjectStats, getBudgetScenarioStats } from "@/lib/mock/stats";

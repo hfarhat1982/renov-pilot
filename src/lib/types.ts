@@ -11,6 +11,7 @@ export type TaskStatus = "a_faire" | "en_cours" | "termine" | "bloque";
 export type Priority = "basse" | "moyenne" | "haute" | "critique";
 export type ArtisanStatus = "a_contacter" | "contacte" | "devis_recu" | "retenu" | "ecarte";
 export type ProjectStatus = "etude" | "travaux" | "termine" | "suspendu";
+export type BudgetRiskLevel = "faible" | "moyen" | "eleve" | "critique";
 
 export interface Project {
   id: string;
@@ -35,6 +36,12 @@ export interface Lot {
   artisanId: string | null;
   priority: Priority;
   notes: string;
+  // Scénarios budgétaires (null = non encore estimé)
+  budgetOptimistic: number | null;
+  budgetRetained: number | null;
+  budgetPessimistic: number | null;
+  budgetRiskLevel: BudgetRiskLevel;
+  budgetComment?: string;
 }
 
 export interface Task {

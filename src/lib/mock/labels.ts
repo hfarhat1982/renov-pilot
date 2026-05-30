@@ -4,6 +4,7 @@ import type {
   Priority,
   ArtisanStatus,
   ProjectStatus,
+  BudgetRiskLevel,
   DocumentItem,
 } from "@/lib/types";
 
@@ -44,6 +45,13 @@ export const artisanStatusLabel: Record<ArtisanStatus, string> = {
   devis_recu: "Devis reçu",
   retenu: "Retenu",
   ecarte: "Écarté",
+};
+
+export const budgetRiskLevelLabel: Record<BudgetRiskLevel, string> = {
+  faible: "Faible",
+  moyen: "Moyen",
+  eleve: "Élevé",
+  critique: "Critique",
 };
 
 export const documentCategoryLabel: Record<DocumentItem["category"], string> = {
