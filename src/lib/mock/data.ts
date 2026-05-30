@@ -1,4 +1,4 @@
-import type { Project, Lot, Task, Artisan, DocumentItem, Note, Alert } from "@/lib/types";
+import type { Project, Lot, Task, Artisan, DocumentItem, Note, Alert, Decision } from "@/lib/types";
 
 export const projects: Project[] = [
   {
@@ -553,5 +553,126 @@ export const alerts: Alert[] = [
     title: "3 lots critiques encore sans devis",
     level: "info",
     date: "2026-05-29",
+  },
+];
+
+export const decisions: Decision[] = [
+  {
+    id: "dec1",
+    projectId: "p1",
+    title: "Solution d'évacuation des eaux usées",
+    context:
+      "Le sous-sol est en dessous du réseau d'évacuation principal. Une solution de relevage est indispensable pour raccorder WC et douche.",
+    options: [
+      "Station de relevage SFA Sanibroyeur PRO (WC + douche + évier)",
+      "Broyeur individuel par appareil sanitaire",
+      "Refonte complète des évacuations (terrassement)",
+    ],
+    selectedOption: "Station de relevage SFA Sanibroyeur PRO (WC + douche + évier)",
+    status: "validee",
+    budgetImpact: 500,
+    planningImpactDays: 0,
+    linkedDocuments: ["Notice station de relevage SFA"],
+    decisionDate: "2026-05-12",
+    priority: "haute",
+    notes: "Bruit acceptable en fonctionnement nocturne. SAV reconnu.",
+  },
+  {
+    id: "dec2",
+    projectId: "p1",
+    title: "Profondeur de décaissement",
+    context:
+      "La hauteur sous plafond brute est de 2,48 m. Après dalle isolée, on obtient 2,28 m — au-dessus du minimum réglementaire de 2,20 m mais sans marge. Un décaissement supplémentaire offre du confort mais alourdit le coût.",
+    options: [
+      "Pas de décaissement supplémentaire (HSP finale : 2,28 m)",
+      "Décaisser 20 cm — terrassement léger (HSP finale : 2,48 m)",
+      "Décaisser 30 cm — terrassement important (HSP finale : 2,58 m)",
+    ],
+    selectedOption: "Décaisser 20 cm — terrassement léger (HSP finale : 2,48 m)",
+    status: "validee",
+    budgetImpact: 2000,
+    planningImpactDays: 5,
+    linkedDocuments: ["Rapport étude de sol G2", "Plan projet aménagement v2"],
+    decisionDate: "2026-04-15",
+    priority: "haute",
+  },
+  {
+    id: "dec3",
+    projectId: "p1",
+    title: "Stratégie de traitement de l'humidité",
+    context:
+      "Une trace d'humidité a été repérée à l'angle sud-est après les pluies de mars. Deux approches s'affrontent : le cuvelage intérieur (radical, coûteux) ou le drainage périphérique extérieur (moins invasif mais expose à un risque résiduel).",
+    options: [
+      "Cuvelage intérieur (enduits d'étanchéité par l'intérieur)",
+      "Drainage périphérique extérieur (fouilles + membrane + drain)",
+      "Combinaison : cuvelage ponctuel angle SE + drain périphérique partiel",
+    ],
+    selectedOption: null,
+    status: "a_trancher",
+    budgetImpact: null,
+    planningImpactDays: null,
+    linkedDocuments: ["Rapport étude de sol G2", "Photo trace humidité angle SE"],
+    decisionDate: null,
+    priority: "critique",
+    notes: "Dépend des résultats de la visite humidité à planifier avant tout engagement.",
+  },
+  {
+    id: "dec4",
+    projectId: "p1",
+    title: "Type de ventilation mécanique",
+    context:
+      "Un sous-sol habitable exige une VMC réglementaire. La VMC simple flux est moins chère à l'achat mais consomme plus et extrait moins bien l'humidité. La VMC double flux est performante mais nécessite un caisson et des gaines.",
+    options: [
+      "VMC simple flux hygro B (solution économique)",
+      "VMC double flux (performance, récupération chaleur)",
+      "Ventilation naturelle renforcée par grilles hautes/basses",
+    ],
+    selectedOption: null,
+    status: "a_trancher",
+    budgetImpact: null,
+    planningImpactDays: null,
+    linkedDocuments: [],
+    decisionDate: null,
+    priority: "haute",
+    notes: "La double flux est recommandée pour un sous-sol avec enjeux humidité.",
+  },
+  {
+    id: "dec5",
+    projectId: "p1",
+    title: "Mode de dépôt de la déclaration préalable",
+    context:
+      "Le projet crée plus de 5 m² de surface habitable. Une déclaration préalable est obligatoire. Deux options : dépôt autonome avec plans maison, ou mandater un architecte pour les plans cotés et le formulaire.",
+    options: [
+      "Dépôt en autonomie avec plans cotés réalisés maison",
+      "Mandater un architecte pour les plans et le dossier complet",
+    ],
+    selectedOption: "Dépôt en autonomie avec plans cotés réalisés maison",
+    status: "validee",
+    budgetImpact: -800,
+    planningImpactDays: 14,
+    linkedDocuments: ["Brouillon CERFA DP", "Plan sous-sol existant", "Plan projet aménagement v2"],
+    decisionDate: "2026-05-20",
+    priority: "critique",
+    notes: "Plans cotés en cours de finalisation. Délai mairie estimé à 1 mois.",
+  },
+  {
+    id: "dec6",
+    projectId: "p1",
+    title: "Technique d'isolation des murs enterrés",
+    context:
+      "Les murs enterrés doivent être isolés thermiquement et protégés de l'humidité. Deux techniques principales : polyuréthane projeté (adhérence maximale, continuité parfaite) ou panneaux PSE rigides (pose plus simple, moins cher mais risque de ponts thermiques).",
+    options: [
+      "Polyuréthane projeté (PUR) sur murs bruts",
+      "Panneaux PSE rigides collés + enduit",
+      "Doublage placo avec laine minérale (solution sèche)",
+    ],
+    selectedOption: "Polyuréthane projeté (PUR) sur murs bruts",
+    status: "validee",
+    budgetImpact: 400,
+    planningImpactDays: 0,
+    linkedDocuments: ["Devis Isolation Confort"],
+    decisionDate: "2026-05-18",
+    priority: "haute",
+    notes: "Choix validé avec Isolation Confort. Meilleure adhérence sur supports irréguliers.",
   },
 ];

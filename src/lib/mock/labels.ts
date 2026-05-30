@@ -5,6 +5,7 @@ import type {
   ArtisanStatus,
   ProjectStatus,
   BudgetRiskLevel,
+  DecisionStatus,
   DocumentItem,
 } from "@/lib/types";
 
@@ -45,6 +46,12 @@ export const artisanStatusLabel: Record<ArtisanStatus, string> = {
   devis_recu: "Devis reçu",
   retenu: "Retenu",
   ecarte: "Écarté",
+};
+
+export const decisionStatusLabel: Record<DecisionStatus, string> = {
+  a_trancher: "À trancher",
+  validee: "Validée",
+  abandonnee: "Abandonnée",
 };
 
 export const budgetRiskLevelLabel: Record<BudgetRiskLevel, string> = {

@@ -13,6 +13,7 @@ export type {
   ArtisanStatus,
   ProjectStatus,
   BudgetRiskLevel,
+  DecisionStatus,
   Project,
   Lot,
   Task,
@@ -20,6 +21,7 @@ export type {
   DocumentItem,
   Note,
   Alert,
+  Decision,
 } from "@/lib/types";
 
 export { formatEUR, formatDate } from "@/lib/utils/format";
@@ -31,9 +33,19 @@ export {
   priorityLabel,
   artisanStatusLabel,
   budgetRiskLevelLabel,
+  decisionStatusLabel,
   documentCategoryLabel,
 } from "@/lib/mock/labels";
 
-export { projects, lots, tasks, artisans, documents, notes, alerts } from "@/lib/mock/data";
+export {
+  projects,
+  lots,
+  tasks,
+  artisans,
+  documents,
+  notes,
+  alerts,
+  decisions,
+} from "@/lib/mock/data";
 
 export { RESERVE, getProjectStats, getBudgetScenarioStats } from "@/lib/mock/stats";

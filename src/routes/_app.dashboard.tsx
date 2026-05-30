@@ -21,18 +21,20 @@ import { getActiveProject, getProjectStats } from "@/lib/services/projects";
 import { getLotsByProject } from "@/lib/services/lots";
 import { getTasksByProject } from "@/lib/services/tasks";
 import { getAlerts } from "@/lib/services/alerts";
+import { getDecisionsByProject } from "@/lib/services/decisions";
 
 export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({ meta: [{ title: "Tableau de bord — RenoV Pilot" }] }),
   loader: async () => {
     const project = await getActiveProject();
-    const [stats, lots, tasks, alerts] = await Promise.all([
+    const [stats, lots, tasks, alerts, decisions] = await Promise.all([
       getProjectStats(project.id),
       getLotsByProject(project.id),
       getTasksByProject(project.id),
       getAlerts(),
+      getDecisionsByProject(project.id),
     ]);
-    return { project, stats, lots, tasks, alerts };
+    return { project, stats, lots, tasks, alerts, decisions };
   },
   component: Dashboard,
 });
@@ -50,7 +52,12 @@ const alertTone = {
 } as const;
 
 function Dashboard() {
-  const { project, stats, lots, tasks, alerts } = Route.useLoaderData();
+  const { project, stats, lots, tasks, alerts, decisions } = Route.useLoaderData();
+  const priorityOrder = { critique: 0, haute: 1, moyenne: 2, basse: 3 } as const;
+  const urgentDecisions = decisions
+    .filter((d) => d.status === "a_trancher")
+    .sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority])
+    .slice(0, 3);
   const criticalLots = lots
     .filter((l) => l.priority === "critique" && l.status !== "termine")
     .slice(0, 5);
@@ -170,6 +177,31 @@ function Dashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {urgentDecisions.length > 0 && (
+        <Card className="border-warning/40 shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between pb-3">
+            <CardTitle className="text-base">Décisions à trancher</CardTitle>
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/notes">Tout voir</Link>
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {urgentDecisions.map((d) => (
+              <div
+                key={d.id}
+                className="flex items-start justify-between gap-3 rounded-lg border border-border/60 p-3"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium">{d.title}</p>
+                  <p className="line-clamp-1 text-xs text-muted-foreground">{d.context}</p>
+                </div>
+                <PriorityBadge priority={d.priority} />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="border-border/60 shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between pb-3">

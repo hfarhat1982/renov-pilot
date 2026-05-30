@@ -15,7 +15,7 @@ const titles: Record<string, string> = {
   "/budget": "Budget",
   "/artisans": "Artisans",
   "/documents": "Documents & photos",
-  "/notes": "Notes & décisions",
+  "/notes": "Décisions chantier",
   "/copilote": "Copilote IA",
 };
 

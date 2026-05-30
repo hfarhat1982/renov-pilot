@@ -12,6 +12,23 @@ export type Priority = "basse" | "moyenne" | "haute" | "critique";
 export type ArtisanStatus = "a_contacter" | "contacte" | "devis_recu" | "retenu" | "ecarte";
 export type ProjectStatus = "etude" | "travaux" | "termine" | "suspendu";
 export type BudgetRiskLevel = "faible" | "moyen" | "eleve" | "critique";
+export type DecisionStatus = "a_trancher" | "validee" | "abandonnee";
+
+export interface Decision {
+  id: string;
+  projectId: string;
+  title: string;
+  context: string;
+  options: string[];
+  selectedOption: string | null;
+  status: DecisionStatus;
+  budgetImpact: number | null;
+  planningImpactDays: number | null;
+  linkedDocuments: string[];
+  decisionDate: string | null;
+  priority: Priority;
+  notes?: string;
+}
 
 export interface Project {
   id: string;
