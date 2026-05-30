@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppTachesRouteImport } from './routes/_app.taches'
 import { Route as AppLotsRouteImport } from './routes/_app.lots'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppProjetsIndexRouteImport } from './routes/_app.projets.index'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppTachesRoute = AppTachesRouteImport.update({
+  id: '/taches',
+  path: '/taches',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppLotsRoute = AppLotsRouteImport.update({
   id: '/lots',
@@ -50,6 +56,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof AppDashboardRoute
   '/lots': typeof AppLotsRoute
+  '/taches': typeof AppTachesRoute
   '/projets/$id': typeof AppProjetsIdRoute
   '/projets/': typeof AppProjetsIndexRoute
 }
@@ -57,6 +64,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof AppDashboardRoute
   '/lots': typeof AppLotsRoute
+  '/taches': typeof AppTachesRoute
   '/projets/$id': typeof AppProjetsIdRoute
   '/projets': typeof AppProjetsIndexRoute
 }
@@ -66,20 +74,28 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/lots': typeof AppLotsRoute
+  '/_app/taches': typeof AppTachesRoute
   '/_app/projets/$id': typeof AppProjetsIdRoute
   '/_app/projets/': typeof AppProjetsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/lots' | '/projets/$id' | '/projets/'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/lots'
+    | '/taches'
+    | '/projets/$id'
+    | '/projets/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/lots' | '/projets/$id' | '/projets'
+  to: '/' | '/dashboard' | '/lots' | '/taches' | '/projets/$id' | '/projets'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/_app/dashboard'
     | '/_app/lots'
+    | '/_app/taches'
     | '/_app/projets/$id'
     | '/_app/projets/'
   fileRoutesById: FileRoutesById
@@ -104,6 +120,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/taches': {
+      id: '/_app/taches'
+      path: '/taches'
+      fullPath: '/taches'
+      preLoaderRoute: typeof AppTachesRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/lots': {
       id: '/_app/lots'
@@ -139,6 +162,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppLotsRoute: typeof AppLotsRoute
+  AppTachesRoute: typeof AppTachesRoute
   AppProjetsIdRoute: typeof AppProjetsIdRoute
   AppProjetsIndexRoute: typeof AppProjetsIndexRoute
 }
@@ -146,6 +170,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppLotsRoute: AppLotsRoute,
+  AppTachesRoute: AppTachesRoute,
   AppProjetsIdRoute: AppProjetsIdRoute,
   AppProjetsIndexRoute: AppProjetsIndexRoute,
 }
