@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { StatusPill } from "@/components/StatusBadges";
-import { formatEUR, getProjectStats, projects } from "@/lib/mockData";
+import { formatEUR, getProjectStats, projects, projectStatusLabel } from "@/lib/mockData";
 
 export const Route = createFileRoute("/_app/projets/")({
   head: () => ({ meta: [{ title: "Projets — RenoV Pilot" }] }),
@@ -39,7 +39,7 @@ function ProjectsList() {
                       {p.type} · {p.surface} m²
                     </p>
                   </div>
-                  <StatusPill tone="info">{p.status}</StatusPill>
+                  <StatusPill tone="info">{projectStatusLabel[p.status]}</StatusPill>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">

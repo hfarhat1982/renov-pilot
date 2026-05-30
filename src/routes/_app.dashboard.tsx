@@ -23,6 +23,7 @@ import {
   getProjectStats,
   lots,
   projects,
+  projectStatusLabel,
   tasks,
 } from "@/lib/mockData";
 
@@ -58,7 +59,7 @@ function Dashboard() {
     <div className="space-y-8">
       <PageHeader
         title="Tableau de bord"
-        description={`${project.name} — ${project.surface} m² · ${project.status}`}
+        description={`${project.name} — ${project.surface} m² · ${projectStatusLabel[project.status]}`}
         actions={
           <Button asChild variant="outline" size="sm">
             <Link to="/projets/$id" params={{ id: project.id }}>
