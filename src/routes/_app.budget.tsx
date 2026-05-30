@@ -14,19 +14,25 @@ import {
 import { StatusPill } from "@/components/StatusBadges";
 import { cn } from "@/lib/utils";
 import { Wallet, TrendingUp, TrendingDown, AlertTriangle } from "lucide-react";
-import { formatEUR, getProjectStats, lots, projects } from "@/lib/mockData";
+import { formatEUR, RESERVE } from "@/lib/mockData";
+import { getActiveProject, getProjectStats } from "@/lib/services/projects";
+import { getLotsByProject } from "@/lib/services/lots";
 
 export const Route = createFileRoute("/_app/budget")({
   head: () => ({ meta: [{ title: "Budget — RenoV Pilot" }] }),
+  loader: async () => {
+    const project = await getActiveProject();
+    const [lots, stats] = await Promise.all([
+      getLotsByProject(project.id),
+      getProjectStats(project.id),
+    ]);
+    return { project, lots, stats };
+  },
   component: BudgetPage,
 });
 
-const RESERVE = 3000;
-
 function BudgetPage() {
-  const project = projects[0];
-  const stats = getProjectStats(project.id);
-  const projectLots = lots.filter((l) => l.projectId === project.id);
+  const { project, lots: projectLots, stats } = Route.useLoaderData();
 
   type Row = {
     name: string;

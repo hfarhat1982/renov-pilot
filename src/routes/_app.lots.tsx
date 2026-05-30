@@ -12,14 +12,23 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { LotStatusBadge, PriorityBadge } from "@/components/StatusBadges";
-import { artisans, formatEUR, lots } from "@/lib/mockData";
+import { formatEUR } from "@/lib/mockData";
+import { getActiveProject } from "@/lib/services/projects";
+import { getLotsByProject } from "@/lib/services/lots";
+import { getArtisans } from "@/lib/services/artisans";
 
 export const Route = createFileRoute("/_app/lots")({
   head: () => ({ meta: [{ title: "Lots travaux — RenoV Pilot" }] }),
+  loader: async () => {
+    const project = await getActiveProject();
+    const [lots, artisans] = await Promise.all([getLotsByProject(project.id), getArtisans()]);
+    return { lots, artisans };
+  },
   component: LotsPage,
 });
 
 function LotsPage() {
+  const { lots, artisans } = Route.useLoaderData();
   const [q, setQ] = useState("");
   const filtered = lots.filter((l) => l.name.toLowerCase().includes(q.toLowerCase()));
   const artisanName = (id: string | null) =>

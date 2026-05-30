@@ -16,19 +16,24 @@ import { LotStatusBadge, PriorityBadge } from "@/components/StatusBadges";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import {
-  alerts,
-  formatDate,
-  formatEUR,
-  getProjectStats,
-  lots,
-  projects,
-  projectStatusLabel,
-  tasks,
-} from "@/lib/mockData";
+import { formatDate, formatEUR, projectStatusLabel } from "@/lib/mockData";
+import { getActiveProject, getProjectStats } from "@/lib/services/projects";
+import { getLotsByProject } from "@/lib/services/lots";
+import { getTasksByProject } from "@/lib/services/tasks";
+import { getAlerts } from "@/lib/services/alerts";
 
 export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({ meta: [{ title: "Tableau de bord — RenoV Pilot" }] }),
+  loader: async () => {
+    const project = await getActiveProject();
+    const [stats, lots, tasks, alerts] = await Promise.all([
+      getProjectStats(project.id),
+      getLotsByProject(project.id),
+      getTasksByProject(project.id),
+      getAlerts(),
+    ]);
+    return { project, stats, lots, tasks, alerts };
+  },
   component: Dashboard,
 });
 
@@ -45,8 +50,7 @@ const alertTone = {
 } as const;
 
 function Dashboard() {
-  const project = projects[0];
-  const stats = getProjectStats(project.id);
+  const { project, stats, lots, tasks, alerts } = Route.useLoaderData();
   const criticalLots = lots
     .filter((l) => l.priority === "critique" && l.status !== "termine")
     .slice(0, 5);
