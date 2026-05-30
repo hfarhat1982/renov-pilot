@@ -9,38 +9,197 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppTachesRouteImport } from './routes/_app.taches'
+import { Route as AppNotesRouteImport } from './routes/_app.notes'
+import { Route as AppLotsRouteImport } from './routes/_app.lots'
+import { Route as AppDocumentsRouteImport } from './routes/_app.documents'
+import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
+import { Route as AppCopiloteRouteImport } from './routes/_app.copilote'
+import { Route as AppBudgetRouteImport } from './routes/_app.budget'
+import { Route as AppArtisansRouteImport } from './routes/_app.artisans'
+import { Route as AppProjetsIndexRouteImport } from './routes/_app.projets.index'
+import { Route as AppProjetsIdRouteImport } from './routes/_app.projets.$id'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppTachesRoute = AppTachesRouteImport.update({
+  id: '/taches',
+  path: '/taches',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNotesRoute = AppNotesRouteImport.update({
+  id: '/notes',
+  path: '/notes',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLotsRoute = AppLotsRouteImport.update({
+  id: '/lots',
+  path: '/lots',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDocumentsRoute = AppDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCopiloteRoute = AppCopiloteRouteImport.update({
+  id: '/copilote',
+  path: '/copilote',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBudgetRoute = AppBudgetRouteImport.update({
+  id: '/budget',
+  path: '/budget',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppArtisansRoute = AppArtisansRouteImport.update({
+  id: '/artisans',
+  path: '/artisans',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProjetsIndexRoute = AppProjetsIndexRouteImport.update({
+  id: '/projets/',
+  path: '/projets/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProjetsIdRoute = AppProjetsIdRouteImport.update({
+  id: '/projets/$id',
+  path: '/projets/$id',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/artisans': typeof AppArtisansRoute
+  '/budget': typeof AppBudgetRoute
+  '/copilote': typeof AppCopiloteRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/documents': typeof AppDocumentsRoute
+  '/lots': typeof AppLotsRoute
+  '/notes': typeof AppNotesRoute
+  '/taches': typeof AppTachesRoute
+  '/projets/$id': typeof AppProjetsIdRoute
+  '/projets/': typeof AppProjetsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/artisans': typeof AppArtisansRoute
+  '/budget': typeof AppBudgetRoute
+  '/copilote': typeof AppCopiloteRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/documents': typeof AppDocumentsRoute
+  '/lots': typeof AppLotsRoute
+  '/notes': typeof AppNotesRoute
+  '/taches': typeof AppTachesRoute
+  '/projets/$id': typeof AppProjetsIdRoute
+  '/projets': typeof AppProjetsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/_app/artisans': typeof AppArtisansRoute
+  '/_app/budget': typeof AppBudgetRoute
+  '/_app/copilote': typeof AppCopiloteRoute
+  '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/documents': typeof AppDocumentsRoute
+  '/_app/lots': typeof AppLotsRoute
+  '/_app/notes': typeof AppNotesRoute
+  '/_app/taches': typeof AppTachesRoute
+  '/_app/projets/$id': typeof AppProjetsIdRoute
+  '/_app/projets/': typeof AppProjetsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/sitemap.xml'
+    | '/artisans'
+    | '/budget'
+    | '/copilote'
+    | '/dashboard'
+    | '/documents'
+    | '/lots'
+    | '/notes'
+    | '/taches'
+    | '/projets/$id'
+    | '/projets/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/sitemap.xml'
+    | '/artisans'
+    | '/budget'
+    | '/copilote'
+    | '/dashboard'
+    | '/documents'
+    | '/lots'
+    | '/notes'
+    | '/taches'
+    | '/projets/$id'
+    | '/projets'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/sitemap.xml'
+    | '/_app/artisans'
+    | '/_app/budget'
+    | '/_app/copilote'
+    | '/_app/dashboard'
+    | '/_app/documents'
+    | '/_app/lots'
+    | '/_app/notes'
+    | '/_app/taches'
+    | '/_app/projets/$id'
+    | '/_app/projets/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +207,112 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/taches': {
+      id: '/_app/taches'
+      path: '/taches'
+      fullPath: '/taches'
+      preLoaderRoute: typeof AppTachesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/notes': {
+      id: '/_app/notes'
+      path: '/notes'
+      fullPath: '/notes'
+      preLoaderRoute: typeof AppNotesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/lots': {
+      id: '/_app/lots'
+      path: '/lots'
+      fullPath: '/lots'
+      preLoaderRoute: typeof AppLotsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/documents': {
+      id: '/_app/documents'
+      path: '/documents'
+      fullPath: '/documents'
+      preLoaderRoute: typeof AppDocumentsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/copilote': {
+      id: '/_app/copilote'
+      path: '/copilote'
+      fullPath: '/copilote'
+      preLoaderRoute: typeof AppCopiloteRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/budget': {
+      id: '/_app/budget'
+      path: '/budget'
+      fullPath: '/budget'
+      preLoaderRoute: typeof AppBudgetRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/artisans': {
+      id: '/_app/artisans'
+      path: '/artisans'
+      fullPath: '/artisans'
+      preLoaderRoute: typeof AppArtisansRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/projets/': {
+      id: '/_app/projets/'
+      path: '/projets'
+      fullPath: '/projets/'
+      preLoaderRoute: typeof AppProjetsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/projets/$id': {
+      id: '/_app/projets/$id'
+      path: '/projets/$id'
+      fullPath: '/projets/$id'
+      preLoaderRoute: typeof AppProjetsIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppArtisansRoute: typeof AppArtisansRoute
+  AppBudgetRoute: typeof AppBudgetRoute
+  AppCopiloteRoute: typeof AppCopiloteRoute
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppDocumentsRoute: typeof AppDocumentsRoute
+  AppLotsRoute: typeof AppLotsRoute
+  AppNotesRoute: typeof AppNotesRoute
+  AppTachesRoute: typeof AppTachesRoute
+  AppProjetsIdRoute: typeof AppProjetsIdRoute
+  AppProjetsIndexRoute: typeof AppProjetsIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppArtisansRoute: AppArtisansRoute,
+  AppBudgetRoute: AppBudgetRoute,
+  AppCopiloteRoute: AppCopiloteRoute,
+  AppDashboardRoute: AppDashboardRoute,
+  AppDocumentsRoute: AppDocumentsRoute,
+  AppLotsRoute: AppLotsRoute,
+  AppNotesRoute: AppNotesRoute,
+  AppTachesRoute: AppTachesRoute,
+  AppProjetsIdRoute: AppProjetsIdRoute,
+  AppProjetsIndexRoute: AppProjetsIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
