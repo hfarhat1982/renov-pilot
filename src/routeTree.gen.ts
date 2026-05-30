@@ -16,6 +16,7 @@ import { Route as AppNotesRouteImport } from './routes/_app.notes'
 import { Route as AppLotsRouteImport } from './routes/_app.lots'
 import { Route as AppDocumentsRouteImport } from './routes/_app.documents'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
+import { Route as AppCopiloteRouteImport } from './routes/_app.copilote'
 import { Route as AppBudgetRouteImport } from './routes/_app.budget'
 import { Route as AppArtisansRouteImport } from './routes/_app.artisans'
 import { Route as AppProjetsIndexRouteImport } from './routes/_app.projets.index'
@@ -55,6 +56,11 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCopiloteRoute = AppCopiloteRouteImport.update({
+  id: '/copilote',
+  path: '/copilote',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppBudgetRoute = AppBudgetRouteImport.update({
   id: '/budget',
   path: '/budget',
@@ -80,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/artisans': typeof AppArtisansRoute
   '/budget': typeof AppBudgetRoute
+  '/copilote': typeof AppCopiloteRoute
   '/dashboard': typeof AppDashboardRoute
   '/documents': typeof AppDocumentsRoute
   '/lots': typeof AppLotsRoute
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/artisans': typeof AppArtisansRoute
   '/budget': typeof AppBudgetRoute
+  '/copilote': typeof AppCopiloteRoute
   '/dashboard': typeof AppDashboardRoute
   '/documents': typeof AppDocumentsRoute
   '/lots': typeof AppLotsRoute
@@ -106,6 +114,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/_app/artisans': typeof AppArtisansRoute
   '/_app/budget': typeof AppBudgetRoute
+  '/_app/copilote': typeof AppCopiloteRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/documents': typeof AppDocumentsRoute
   '/_app/lots': typeof AppLotsRoute
@@ -120,6 +129,7 @@ export interface FileRouteTypes {
     | '/'
     | '/artisans'
     | '/budget'
+    | '/copilote'
     | '/dashboard'
     | '/documents'
     | '/lots'
@@ -132,6 +142,7 @@ export interface FileRouteTypes {
     | '/'
     | '/artisans'
     | '/budget'
+    | '/copilote'
     | '/dashboard'
     | '/documents'
     | '/lots'
@@ -145,6 +156,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/_app/artisans'
     | '/_app/budget'
+    | '/_app/copilote'
     | '/_app/dashboard'
     | '/_app/documents'
     | '/_app/lots'
@@ -210,6 +222,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/copilote': {
+      id: '/_app/copilote'
+      path: '/copilote'
+      fullPath: '/copilote'
+      preLoaderRoute: typeof AppCopiloteRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/budget': {
       id: '/_app/budget'
       path: '/budget'
@@ -244,6 +263,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppArtisansRoute: typeof AppArtisansRoute
   AppBudgetRoute: typeof AppBudgetRoute
+  AppCopiloteRoute: typeof AppCopiloteRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppDocumentsRoute: typeof AppDocumentsRoute
   AppLotsRoute: typeof AppLotsRoute
@@ -256,6 +276,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppArtisansRoute: AppArtisansRoute,
   AppBudgetRoute: AppBudgetRoute,
+  AppCopiloteRoute: AppCopiloteRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppDocumentsRoute: AppDocumentsRoute,
   AppLotsRoute: AppLotsRoute,
