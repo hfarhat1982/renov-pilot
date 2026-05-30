@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -12,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { LotStatusBadge, PriorityBadge } from "@/components/StatusBadges";
+import { Plus } from "lucide-react";
 import { formatEUR } from "@/lib/mockData";
 import { getActiveProject } from "@/lib/services/projects";
 import { getLotsByProject } from "@/lib/services/lots";
@@ -39,10 +41,20 @@ function LotsPage() {
       <PageHeader
         title="Lots travaux"
         description="Tous les corps d'état du projet, du devis à la réception."
+        actions={
+          <Button size="sm" variant="outline" disabled>
+            <Plus className="mr-1 h-4 w-4" />
+            Ajouter devis
+          </Button>
+        }
       />
 
-      <div className="max-w-sm">
+      <div className="max-w-sm space-y-1.5">
         <Input placeholder="Rechercher un lot…" value={q} onChange={(e) => setQ(e.target.value)} />
+        <p className="text-xs text-muted-foreground">
+          {filtered.length} lot{filtered.length > 1 ? "s" : ""}
+          {q ? ` pour « ${q} »` : ""}
+        </p>
       </div>
 
       {/* Desktop table */}

@@ -11,7 +11,10 @@ import {
   Wallet,
   CalendarDays,
   Paperclip,
+  Plus,
+  Camera,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   formatDate,
@@ -83,14 +86,34 @@ function DecisionsPage() {
       <PageHeader
         title="Décisions chantier"
         description="Options envisagées, choix retenus, impact budget et planning pour chaque décision clé."
+        actions={
+          <>
+            <Button size="sm" variant="outline" disabled>
+              <Plus className="mr-1 h-4 w-4" />
+              Ajouter décision
+            </Button>
+            <Button size="sm" variant="ghost" disabled>
+              <Camera className="mr-1 h-4 w-4" />
+              Photo
+            </Button>
+          </>
+        }
       />
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
-        <TabsList>
-          <TabsTrigger value="all">Toutes ({decisions.length})</TabsTrigger>
-          <TabsTrigger value="a_trancher">À trancher ({counts.a_trancher})</TabsTrigger>
-          <TabsTrigger value="validee">Validées ({counts.validee})</TabsTrigger>
-          <TabsTrigger value="abandonnee">Abandonnées ({counts.abandonnee})</TabsTrigger>
+        <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 bg-secondary/60 p-1">
+          <TabsTrigger value="all" className="text-xs">
+            Toutes ({decisions.length})
+          </TabsTrigger>
+          <TabsTrigger value="a_trancher" className="text-xs">
+            À trancher ({counts.a_trancher})
+          </TabsTrigger>
+          <TabsTrigger value="validee" className="text-xs">
+            Validées ({counts.validee})
+          </TabsTrigger>
+          <TabsTrigger value="abandonnee" className="text-xs">
+            Abandonnées ({counts.abandonnee})
+          </TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -103,7 +126,7 @@ function DecisionsPage() {
               d.status === "a_trancher" && "border-warning/50",
             )}
           >
-            <CardContent className="space-y-4 p-5">
+            <CardContent className="space-y-3 p-4 sm:space-y-4 sm:p-5">
               {/* En-tête */}
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0 space-y-0.5">
@@ -135,7 +158,7 @@ function DecisionsPage() {
                       <li
                         key={opt}
                         className={cn(
-                          "flex items-start gap-2 rounded-md px-2 py-1.5 text-sm",
+                          "flex items-start gap-2 rounded-md px-2 py-1 text-sm",
                           isSelected
                             ? "bg-success/10 font-medium text-success"
                             : "text-muted-foreground",

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/PageHeader";
 import { StatCard } from "@/components/StatCard";
 import { StatusPill } from "@/components/StatusBadges";
@@ -13,7 +14,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { Wallet, TrendingUp, TrendingDown, Gauge, AlertTriangle, CircleAlert } from "lucide-react";
+import {
+  Wallet,
+  TrendingUp,
+  TrendingDown,
+  Gauge,
+  AlertTriangle,
+  CircleAlert,
+  Plus,
+} from "lucide-react";
 import { formatEUR, RESERVE, budgetRiskLevelLabel } from "@/lib/mockData";
 import type { BudgetRiskLevel } from "@/lib/mockData";
 import { getBudgetScenarioStats } from "@/lib/mock/stats";
@@ -62,7 +71,16 @@ function BudgetPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Budget" description="Scénarios budgétaires et suivi des coûts par lot." />
+      <PageHeader
+        title="Budget"
+        description="Scénarios budgétaires et suivi des coûts par lot."
+        actions={
+          <Button size="sm" variant="outline" disabled>
+            <Plus className="mr-1 h-4 w-4" />
+            Ajouter devis
+          </Button>
+        }
+      />
 
       {/* Résumé budget actuel */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -98,7 +116,44 @@ function BudgetPage() {
         <p className="text-sm font-medium text-muted-foreground">
           Scénarios budgétaires — réserve imprévus {formatEUR(RESERVE)} incluse
         </p>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {/* Résumé compact mobile (3 chiffres côte à côte) */}
+        <div className="rounded-lg border border-border/60 bg-card p-4 sm:hidden">
+          <div className="grid grid-cols-3 divide-x divide-border/60 text-center">
+            <div className="pr-2">
+              <p className="text-[11px] text-muted-foreground">Optimiste</p>
+              <p
+                className={cn(
+                  "mt-0.5 text-sm font-semibold tabular-nums",
+                  optimisticTotal + RESERVE <= project.budgetTarget
+                    ? "text-success"
+                    : "text-warning-foreground",
+                )}
+              >
+                {formatEUR(optimisticTotal + RESERVE)}
+              </p>
+            </div>
+            <div className="px-2">
+              <p className="text-[11px] text-muted-foreground">Retenu</p>
+              <p
+                className={cn(
+                  "mt-0.5 text-sm font-semibold tabular-nums",
+                  targetGapRetained < 0 ? "text-warning-foreground" : "text-foreground",
+                )}
+              >
+                {formatEUR(retainedWithReserve)}
+              </p>
+            </div>
+            <div className="pl-2">
+              <p className="text-[11px] text-muted-foreground">Pessimiste</p>
+              <p className="mt-0.5 text-sm font-semibold tabular-nums text-destructive">
+                {formatEUR(pessimisticWithReserve)}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Cartes détaillées sur sm+ */}
+        <div className="hidden sm:grid sm:grid-cols-3 sm:gap-4">
           <StatCard
             label="Optimiste"
             value={formatEUR(optimisticTotal + RESERVE)}

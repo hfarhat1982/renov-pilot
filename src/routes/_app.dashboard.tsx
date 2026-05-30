@@ -8,6 +8,7 @@ import {
   CircleAlert,
   Info,
   ArrowRight,
+  Plus,
 } from "lucide-react";
 
 import { PageHeader } from "@/components/PageHeader";
@@ -67,21 +68,29 @@ function Dashboard() {
     .slice(0, 5);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
         title="Tableau de bord"
         description={`${project.name} — ${project.surface} m² · ${projectStatusLabel[project.status]}`}
         actions={
-          <Button asChild variant="outline" size="sm">
-            <Link to="/projets/$id" params={{ id: project.id }}>
-              Voir le projet
-              <ArrowRight className="ml-1 h-4 w-4" />
-            </Link>
-          </Button>
+          <>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/projets/$id" params={{ id: project.id }}>
+                Voir le projet
+                <ArrowRight className="ml-1 h-4 w-4" />
+              </Link>
+            </Button>
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/notes">
+                <Plus className="mr-1 h-4 w-4" />
+                Ajouter note
+              </Link>
+            </Button>
+          </>
         }
       />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatCard
           label="Budget cible"
           value={formatEUR(stats.target)}
@@ -168,7 +177,7 @@ function Dashboard() {
                     Budget prévu : {formatEUR(lot.budgetPlanned)}
                   </p>
                 </div>
-                <div className="flex shrink-0 gap-2">
+                <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
                   <PriorityBadge priority={lot.priority} />
                   <LotStatusBadge status={lot.status} />
                 </div>
