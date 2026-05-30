@@ -17,9 +17,15 @@ type Cat = DocumentItem["category"] | "all";
 
 function DocumentsPage() {
   const [cat, setCat] = useState<Cat>("all");
-  const filtered = useMemo(() => documents.filter((d) => cat === "all" || d.category === cat), [cat]);
+  const filtered = useMemo(
+    () => documents.filter((d) => cat === "all" || d.category === cat),
+    [cat],
+  );
 
-  const cats: Cat[] = ["all", ...Object.keys(documentCategoryLabel) as DocumentItem["category"][]];
+  const cats: Cat[] = [
+    "all",
+    ...(Object.keys(documentCategoryLabel) as DocumentItem["category"][]),
+  ];
 
   return (
     <div className="space-y-6">
@@ -51,10 +57,12 @@ function DocumentsPage() {
           return (
             <Card key={d.id} className="border-border/60 shadow-sm">
               <CardContent className="flex items-start gap-3 p-4">
-                <div className={cn(
-                  "flex h-10 w-10 shrink-0 items-center justify-center rounded-md",
-                  isImage ? "bg-info/10 text-info" : "bg-primary/10 text-primary",
-                )}>
+                <div
+                  className={cn(
+                    "flex h-10 w-10 shrink-0 items-center justify-center rounded-md",
+                    isImage ? "bg-info/10 text-info" : "bg-primary/10 text-primary",
+                  )}
+                >
                   <Icon className="h-5 w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -74,7 +82,9 @@ function DocumentsPage() {
           );
         })}
         {filtered.length === 0 && (
-          <p className="col-span-full py-12 text-center text-sm text-muted-foreground">Aucun document dans cette catégorie.</p>
+          <p className="col-span-full py-12 text-center text-sm text-muted-foreground">
+            Aucun document dans cette catégorie.
+          </p>
         )}
       </div>
     </div>

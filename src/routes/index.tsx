@@ -28,10 +28,26 @@ export const Route = createFileRoute("/")({
 });
 
 const features = [
-  { icon: Hammer, title: "Lots & tâches", text: "Tous vos lots travaux et tâches dans un fil clair, du devis à la réception." },
-  { icon: Wallet, title: "Budget maîtrisé", text: "Prévu, devis, réel : un seul tableau pour suivre les écarts et la marge imprévus." },
-  { icon: FileText, title: "Documents centralisés", text: "Plans, devis, factures, photos chantier et garanties au même endroit." },
-  { icon: Sparkles, title: "Copilote IA", text: "Analysez un devis, détectez les postes oubliés, générez un compte-rendu de chantier." },
+  {
+    icon: Hammer,
+    title: "Lots & tâches",
+    text: "Tous vos lots travaux et tâches dans un fil clair, du devis à la réception.",
+  },
+  {
+    icon: Wallet,
+    title: "Budget maîtrisé",
+    text: "Prévu, devis, réel : un seul tableau pour suivre les écarts et la marge imprévus.",
+  },
+  {
+    icon: FileText,
+    title: "Documents centralisés",
+    text: "Plans, devis, factures, photos chantier et garanties au même endroit.",
+  },
+  {
+    icon: Sparkles,
+    title: "Copilote IA",
+    text: "Analysez un devis, détectez les postes oubliés, générez un compte-rendu de chantier.",
+  },
 ];
 
 function Landing() {
@@ -67,9 +83,9 @@ function Landing() {
               <span className="text-primary">sans rien oublier.</span>
             </h1>
             <p className="text-lg text-muted-foreground">
-              RenoV Pilot rassemble vos lots, votre budget, vos artisans, vos devis et vos
-              documents dans un poste de pilotage clair — pensé pour les particuliers exigeants
-              et les petits artisans.
+              RenoV Pilot rassemble vos lots, votre budget, vos artisans, vos devis et vos documents
+              dans un poste de pilotage clair — pensé pour les particuliers exigeants et les petits
+              artisans.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button asChild size="lg">
@@ -92,8 +108,8 @@ function Landing() {
             Tout votre chantier, dans une seule app
           </h2>
           <p className="mt-2 text-muted-foreground">
-            Conçu autour d'un vrai projet : l'aménagement d'un sous-sol semi-enterré en
-            espace habitable.
+            Conçu autour d'un vrai projet : l'aménagement d'un sous-sol semi-enterré en espace
+            habitable.
           </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -113,7 +129,9 @@ function Landing() {
         <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 px-4 py-10 sm:flex-row sm:items-center sm:px-6">
           <div>
             <h3 className="text-lg font-semibold">Prêt à piloter votre chantier ?</h3>
-            <p className="text-sm text-muted-foreground">Données fictives — aucun compte requis dans cette version.</p>
+            <p className="text-sm text-muted-foreground">
+              Données fictives — aucun compte requis dans cette version.
+            </p>
           </div>
           <Button asChild>
             <Link to="/dashboard">

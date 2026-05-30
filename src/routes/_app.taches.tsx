@@ -24,11 +24,14 @@ function TasksPage() {
       .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
   }, [q, tab]);
 
-  const lotName = (id: string | null) => (id ? lots.find((l) => l.id === id)?.name ?? "—" : "—");
+  const lotName = (id: string | null) => (id ? (lots.find((l) => l.id === id)?.name ?? "—") : "—");
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Tâches" description="Toutes les actions concrètes à mener pour faire avancer le projet." />
+      <PageHeader
+        title="Tâches"
+        description="Toutes les actions concrètes à mener pour faire avancer le projet."
+      />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
@@ -56,8 +59,14 @@ function TasksPage() {
                 <p className="text-xs text-muted-foreground">Lot : {lotName(t.lotId)}</p>
                 {t.notes && <p className="text-xs text-muted-foreground">{t.notes}</p>}
                 <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{formatDate(t.dueDate)}</span>
-                  <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" />{t.owner}</span>
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3.5 w-3.5" />
+                    {formatDate(t.dueDate)}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <User className="h-3.5 w-3.5" />
+                    {t.owner}
+                  </span>
                 </div>
               </div>
               <div className="flex shrink-0 items-center gap-2">
@@ -68,7 +77,9 @@ function TasksPage() {
           </Card>
         ))}
         {filtered.length === 0 && (
-          <p className="py-12 text-center text-sm text-muted-foreground">Aucune tâche pour ce filtre.</p>
+          <p className="py-12 text-center text-sm text-muted-foreground">
+            Aucune tâche pour ce filtre.
+          </p>
         )}
       </div>
     </div>

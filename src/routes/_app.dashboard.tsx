@@ -16,7 +16,15 @@ import { LotStatusBadge, PriorityBadge } from "@/components/StatusBadges";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { alerts, formatDate, formatEUR, getProjectStats, lots, projects, tasks } from "@/lib/mockData";
+import {
+  alerts,
+  formatDate,
+  formatEUR,
+  getProjectStats,
+  lots,
+  projects,
+  tasks,
+} from "@/lib/mockData";
 
 export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({ meta: [{ title: "Tableau de bord — RenoV Pilot" }] }),
@@ -38,7 +46,9 @@ const alertTone = {
 function Dashboard() {
   const project = projects[0];
   const stats = getProjectStats(project.id);
-  const criticalLots = lots.filter((l) => l.priority === "critique" && l.status !== "termine").slice(0, 5);
+  const criticalLots = lots
+    .filter((l) => l.priority === "critique" && l.status !== "termine")
+    .slice(0, 5);
   const upcomingTasks = [...tasks]
     .filter((t) => t.status !== "termine")
     .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
@@ -111,8 +121,13 @@ function Dashboard() {
             {alerts.map((a) => {
               const Icon = alertIcon[a.level];
               return (
-                <div key={a.id} className="flex items-start gap-3 rounded-lg border border-border/60 p-3">
-                  <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${alertTone[a.level]}`}>
+                <div
+                  key={a.id}
+                  className="flex items-start gap-3 rounded-lg border border-border/60 p-3"
+                >
+                  <div
+                    className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${alertTone[a.level]}`}
+                  >
                     <Icon className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -131,10 +146,15 @@ function Dashboard() {
           </CardHeader>
           <CardContent className="space-y-2">
             {criticalLots.map((lot) => (
-              <div key={lot.id} className="flex items-center justify-between gap-2 rounded-lg border border-border/60 p-3">
+              <div
+                key={lot.id}
+                className="flex items-center justify-between gap-2 rounded-lg border border-border/60 p-3"
+              >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{lot.name}</p>
-                  <p className="text-xs text-muted-foreground">Budget prévu : {formatEUR(lot.budgetPlanned)}</p>
+                  <p className="text-xs text-muted-foreground">
+                    Budget prévu : {formatEUR(lot.budgetPlanned)}
+                  </p>
                 </div>
                 <div className="flex shrink-0 gap-2">
                   <PriorityBadge priority={lot.priority} />
@@ -155,7 +175,10 @@ function Dashboard() {
         </CardHeader>
         <CardContent className="space-y-2">
           {upcomingTasks.map((t) => (
-            <div key={t.id} className="flex items-center justify-between gap-3 rounded-lg border border-border/60 p-3">
+            <div
+              key={t.id}
+              className="flex items-center justify-between gap-3 rounded-lg border border-border/60 p-3"
+            >
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium">{t.title}</p>
                 <p className="text-xs text-muted-foreground">

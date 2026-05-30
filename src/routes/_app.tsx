@@ -22,8 +22,7 @@ const titles: Record<string, string> = {
 function AppLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const title =
-    titles[pathname] ??
-    (pathname.startsWith("/projets/") ? "Détail projet" : "RenoV Pilot");
+    titles[pathname] ?? (pathname.startsWith("/projets/") ? "Détail projet" : "RenoV Pilot");
 
   return (
     <SidebarProvider>

@@ -78,17 +78,34 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Lovable App" },
-      { name: "description", content: "RenoV Pilot Pro is a responsive web app for managing renovation projects." },
+      {
+        name: "description",
+        content: "RenoV Pilot Pro is a responsive web app for managing renovation projects.",
+      },
       { name: "author", content: "Lovable" },
       { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "RenoV Pilot Pro is a responsive web app for managing renovation projects." },
+      {
+        property: "og:description",
+        content: "RenoV Pilot Pro is a responsive web app for managing renovation projects.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "Lovable App" },
-      { name: "twitter:description", content: "RenoV Pilot Pro is a responsive web app for managing renovation projects." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/6e1de1f1-8f7b-4198-b1fb-f25952eb7c58/id-preview-45f04057--39616cc4-02fd-4e73-a810-017b1d078556.lovable.app-1780132315842.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/6e1de1f1-8f7b-4198-b1fb-f25952eb7c58/id-preview-45f04057--39616cc4-02fd-4e73-a810-017b1d078556.lovable.app-1780132315842.png" },
+      {
+        name: "twitter:description",
+        content: "RenoV Pilot Pro is a responsive web app for managing renovation projects.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/6e1de1f1-8f7b-4198-b1fb-f25952eb7c58/id-preview-45f04057--39616cc4-02fd-4e73-a810-017b1d078556.lovable.app-1780132315842.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/6e1de1f1-8f7b-4198-b1fb-f25952eb7c58/id-preview-45f04057--39616cc4-02fd-4e73-a810-017b1d078556.lovable.app-1780132315842.png",
+      },
     ],
     links: [
       {

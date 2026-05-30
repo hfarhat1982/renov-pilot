@@ -45,10 +45,27 @@ function ProjectDetail() {
       />
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard label="Surface" value={`${project.surface} m²`} icon={<Ruler className="h-4 w-4" />} />
-        <StatCard label="Budget cible" value={formatEUR(project.budgetTarget)} icon={<Wallet className="h-4 w-4" />} />
-        <StatCard label="Engagé" value={formatEUR(s.engaged)} icon={<Target className="h-4 w-4" />} tone="info" />
-        <StatCard label="Démarrage" value={formatDate(project.startDate)} icon={<Calendar className="h-4 w-4" />} />
+        <StatCard
+          label="Surface"
+          value={`${project.surface} m²`}
+          icon={<Ruler className="h-4 w-4" />}
+        />
+        <StatCard
+          label="Budget cible"
+          value={formatEUR(project.budgetTarget)}
+          icon={<Wallet className="h-4 w-4" />}
+        />
+        <StatCard
+          label="Engagé"
+          value={formatEUR(s.engaged)}
+          icon={<Target className="h-4 w-4" />}
+          tone="info"
+        />
+        <StatCard
+          label="Démarrage"
+          value={formatDate(project.startDate)}
+          icon={<Calendar className="h-4 w-4" />}
+        />
       </div>
 
       <Card className="border-border/60 shadow-sm">
@@ -57,7 +74,9 @@ function ProjectDetail() {
         </CardHeader>
         <CardContent className="space-y-2">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">{s.lotsDone} / {s.lotsTotal} lots terminés</span>
+            <span className="text-muted-foreground">
+              {s.lotsDone} / {s.lotsTotal} lots terminés
+            </span>
             <span className="font-medium">{s.progress}%</span>
           </div>
           <Progress value={s.progress} className="h-2" />
@@ -93,10 +112,15 @@ function ProjectDetail() {
           </CardHeader>
           <CardContent className="space-y-2">
             {projectLots.slice(0, 6).map((l) => (
-              <div key={l.id} className="flex items-center justify-between gap-2 rounded-lg border border-border/60 p-3">
+              <div
+                key={l.id}
+                className="flex items-center justify-between gap-2 rounded-lg border border-border/60 p-3"
+              >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{l.name}</p>
-                  <p className="text-xs text-muted-foreground">Prévu : {formatEUR(l.budgetPlanned)}</p>
+                  <p className="text-xs text-muted-foreground">
+                    Prévu : {formatEUR(l.budgetPlanned)}
+                  </p>
                 </div>
                 <LotStatusBadge status={l.status} />
               </div>
@@ -112,15 +136,23 @@ function ProjectDetail() {
             </Button>
           </CardHeader>
           <CardContent className="space-y-2">
-            {projectTasks.filter((t) => t.status !== "termine").slice(0, 6).map((t) => (
-              <div key={t.id} className="flex items-center justify-between gap-2 rounded-lg border border-border/60 p-3">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">{t.title}</p>
-                  <p className="text-xs text-muted-foreground">Échéance : {formatDate(t.dueDate)}</p>
+            {projectTasks
+              .filter((t) => t.status !== "termine")
+              .slice(0, 6)
+              .map((t) => (
+                <div
+                  key={t.id}
+                  className="flex items-center justify-between gap-2 rounded-lg border border-border/60 p-3"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{t.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Échéance : {formatDate(t.dueDate)}
+                    </p>
+                  </div>
+                  <PriorityBadge priority={t.priority} />
                 </div>
-                <PriorityBadge priority={t.priority} />
-              </div>
-            ))}
+              ))}
           </CardContent>
         </Card>
       </div>

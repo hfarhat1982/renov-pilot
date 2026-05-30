@@ -22,7 +22,8 @@ export const Route = createFileRoute("/_app/lots")({
 function LotsPage() {
   const [q, setQ] = useState("");
   const filtered = lots.filter((l) => l.name.toLowerCase().includes(q.toLowerCase()));
-  const artisanName = (id: string | null) => (id ? artisans.find((a) => a.id === id)?.name ?? "—" : "—");
+  const artisanName = (id: string | null) =>
+    id ? (artisans.find((a) => a.id === id)?.name ?? "—") : "—";
 
   return (
     <div className="space-y-6">
@@ -57,12 +58,22 @@ function LotsPage() {
                     <div className="font-medium">{l.name}</div>
                     {l.notes && <div className="text-xs text-muted-foreground">{l.notes}</div>}
                   </TableCell>
-                  <TableCell><LotStatusBadge status={l.status} /></TableCell>
-                  <TableCell><PriorityBadge priority={l.priority} /></TableCell>
-                  <TableCell className="text-right tabular-nums">{formatEUR(l.budgetPlanned)}</TableCell>
-                  <TableCell className="text-right tabular-nums">{formatEUR(l.quoteReceived)}</TableCell>
+                  <TableCell>
+                    <LotStatusBadge status={l.status} />
+                  </TableCell>
+                  <TableCell>
+                    <PriorityBadge priority={l.priority} />
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {formatEUR(l.budgetPlanned)}
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums">
+                    {formatEUR(l.quoteReceived)}
+                  </TableCell>
                   <TableCell className="text-right tabular-nums">{formatEUR(l.realCost)}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{artisanName(l.artisanId)}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {artisanName(l.artisanId)}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

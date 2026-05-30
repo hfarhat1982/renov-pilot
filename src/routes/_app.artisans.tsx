@@ -30,7 +30,10 @@ function Rating({ value }: { value: number }) {
 function ArtisansPage() {
   return (
     <div className="space-y-6">
-      <PageHeader title="Artisans & contacts" description="Annuaire des artisans consultés pour le projet." />
+      <PageHeader
+        title="Artisans & contacts"
+        description="Annuaire des artisans consultés pour le projet."
+      />
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {artisans.map((a) => (
@@ -45,11 +48,17 @@ function ArtisansPage() {
               </div>
 
               <div className="space-y-1.5 text-sm">
-                <a href={`tel:${a.phone}`} className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
+                <a
+                  href={`tel:${a.phone}`}
+                  className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+                >
                   <Phone className="h-3.5 w-3.5" />
                   <span className="tabular-nums">{a.phone}</span>
                 </a>
-                <a href={`mailto:${a.email}`} className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
+                <a
+                  href={`mailto:${a.email}`}
+                  className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+                >
                   <Mail className="h-3.5 w-3.5" />
                   <span className="truncate">{a.email}</span>
                 </a>

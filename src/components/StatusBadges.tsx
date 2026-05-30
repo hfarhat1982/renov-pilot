@@ -1,18 +1,8 @@
 import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import type {
-  LotStatus,
-  TaskStatus,
-  Priority,
-  ArtisanStatus,
-} from "@/lib/mockData";
-import {
-  lotStatusLabel,
-  taskStatusLabel,
-  priorityLabel,
-  artisanStatusLabel,
-} from "@/lib/mockData";
+import type { LotStatus, TaskStatus, Priority, ArtisanStatus } from "@/lib/mockData";
+import { lotStatusLabel, taskStatusLabel, priorityLabel, artisanStatusLabel } from "@/lib/mockData";
 
 type Tone = "neutral" | "info" | "success" | "warning" | "danger" | "muted";
 
@@ -25,7 +15,15 @@ const toneClass: Record<Tone, string> = {
   muted: "bg-muted text-muted-foreground border-transparent",
 };
 
-export function StatusPill({ tone, children, className }: { tone: Tone; children: ReactNode; className?: string }) {
+export function StatusPill({
+  tone,
+  children,
+  className,
+}: {
+  tone: Tone;
+  children: ReactNode;
+  className?: string;
+}) {
   return (
     <Badge variant="outline" className={cn("font-medium", toneClass[tone], className)}>
       {children}

@@ -70,30 +70,30 @@
 :root {
   --radius: 0.625rem;
   --background: oklch(0.985 0.003 247);
-  --foreground: oklch(0.20 0.04 250);
+  --foreground: oklch(0.2 0.04 250);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.20 0.04 250);
+  --card-foreground: oklch(0.2 0.04 250);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.20 0.04 250);
-  --primary: oklch(0.34 0.10 255);
+  --popover-foreground: oklch(0.2 0.04 250);
+  --primary: oklch(0.34 0.1 255);
   --primary-foreground: oklch(0.985 0.003 247);
   --secondary: oklch(0.96 0.01 250);
-  --secondary-foreground: oklch(0.30 0.06 255);
+  --secondary-foreground: oklch(0.3 0.06 255);
   --muted: oklch(0.965 0.008 250);
   --muted-foreground: oklch(0.52 0.03 255);
   --accent: oklch(0.94 0.03 250);
-  --accent-foreground: oklch(0.30 0.06 255);
+  --accent-foreground: oklch(0.3 0.06 255);
   --destructive: oklch(0.58 0.22 27);
   --destructive-foreground: oklch(0.985 0.003 247);
   --success: oklch(0.62 0.15 152);
   --success-foreground: oklch(0.985 0.003 247);
   --warning: oklch(0.72 0.16 65);
-  --warning-foreground: oklch(0.20 0.04 250);
+  --warning-foreground: oklch(0.2 0.04 250);
   --info: oklch(0.62 0.12 235);
   --info-foreground: oklch(0.985 0.003 247);
   --border: oklch(0.91 0.012 250);
   --input: oklch(0.91 0.012 250);
-  --ring: oklch(0.55 0.10 255);
+  --ring: oklch(0.55 0.1 255);
   --chart-1: oklch(0.55 0.15 255);
   --chart-2: oklch(0.62 0.15 152);
   --chart-3: oklch(0.72 0.16 65);
@@ -101,12 +101,12 @@
   --chart-5: oklch(0.55 0.06 255);
   --sidebar: oklch(0.99 0.003 247);
   --sidebar-foreground: oklch(0.25 0.04 250);
-  --sidebar-primary: oklch(0.34 0.10 255);
+  --sidebar-primary: oklch(0.34 0.1 255);
   --sidebar-primary-foreground: oklch(0.985 0.003 247);
   --sidebar-accent: oklch(0.94 0.02 250);
-  --sidebar-accent-foreground: oklch(0.30 0.06 255);
+  --sidebar-accent-foreground: oklch(0.3 0.06 255);
   --sidebar-border: oklch(0.91 0.012 250);
-  --sidebar-ring: oklch(0.55 0.10 255);
+  --sidebar-ring: oklch(0.55 0.1 255);
 }
 
 .dark {
