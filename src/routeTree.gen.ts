@@ -15,6 +15,7 @@ import { Route as AppTachesRouteImport } from './routes/_app.taches'
 import { Route as AppLotsRouteImport } from './routes/_app.lots'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppBudgetRouteImport } from './routes/_app.budget'
+import { Route as AppArtisansRouteImport } from './routes/_app.artisans'
 import { Route as AppProjetsIndexRouteImport } from './routes/_app.projets.index'
 import { Route as AppProjetsIdRouteImport } from './routes/_app.projets.$id'
 
@@ -47,6 +48,11 @@ const AppBudgetRoute = AppBudgetRouteImport.update({
   path: '/budget',
   getParentRoute: () => AppRoute,
 } as any)
+const AppArtisansRoute = AppArtisansRouteImport.update({
+  id: '/artisans',
+  path: '/artisans',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppProjetsIndexRoute = AppProjetsIndexRouteImport.update({
   id: '/projets/',
   path: '/projets/',
@@ -60,6 +66,7 @@ const AppProjetsIdRoute = AppProjetsIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/artisans': typeof AppArtisansRoute
   '/budget': typeof AppBudgetRoute
   '/dashboard': typeof AppDashboardRoute
   '/lots': typeof AppLotsRoute
@@ -69,6 +76,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/artisans': typeof AppArtisansRoute
   '/budget': typeof AppBudgetRoute
   '/dashboard': typeof AppDashboardRoute
   '/lots': typeof AppLotsRoute
@@ -80,6 +88,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
+  '/_app/artisans': typeof AppArtisansRoute
   '/_app/budget': typeof AppBudgetRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/lots': typeof AppLotsRoute
@@ -91,6 +100,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/artisans'
     | '/budget'
     | '/dashboard'
     | '/lots'
@@ -100,6 +110,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/artisans'
     | '/budget'
     | '/dashboard'
     | '/lots'
@@ -110,6 +121,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_app'
+    | '/_app/artisans'
     | '/_app/budget'
     | '/_app/dashboard'
     | '/_app/lots'
@@ -167,6 +179,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBudgetRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/artisans': {
+      id: '/_app/artisans'
+      path: '/artisans'
+      fullPath: '/artisans'
+      preLoaderRoute: typeof AppArtisansRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/projets/': {
       id: '/_app/projets/'
       path: '/projets'
@@ -185,6 +204,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppArtisansRoute: typeof AppArtisansRoute
   AppBudgetRoute: typeof AppBudgetRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppLotsRoute: typeof AppLotsRoute
@@ -194,6 +214,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppArtisansRoute: AppArtisansRoute,
   AppBudgetRoute: AppBudgetRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppLotsRoute: AppLotsRoute,
