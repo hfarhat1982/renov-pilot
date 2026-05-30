@@ -13,6 +13,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppTachesRouteImport } from './routes/_app.taches'
 import { Route as AppLotsRouteImport } from './routes/_app.lots'
+import { Route as AppDocumentsRouteImport } from './routes/_app.documents'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppBudgetRouteImport } from './routes/_app.budget'
 import { Route as AppArtisansRouteImport } from './routes/_app.artisans'
@@ -36,6 +37,11 @@ const AppTachesRoute = AppTachesRouteImport.update({
 const AppLotsRoute = AppLotsRouteImport.update({
   id: '/lots',
   path: '/lots',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDocumentsRoute = AppDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
   getParentRoute: () => AppRoute,
 } as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
@@ -69,6 +75,7 @@ export interface FileRoutesByFullPath {
   '/artisans': typeof AppArtisansRoute
   '/budget': typeof AppBudgetRoute
   '/dashboard': typeof AppDashboardRoute
+  '/documents': typeof AppDocumentsRoute
   '/lots': typeof AppLotsRoute
   '/taches': typeof AppTachesRoute
   '/projets/$id': typeof AppProjetsIdRoute
@@ -79,6 +86,7 @@ export interface FileRoutesByTo {
   '/artisans': typeof AppArtisansRoute
   '/budget': typeof AppBudgetRoute
   '/dashboard': typeof AppDashboardRoute
+  '/documents': typeof AppDocumentsRoute
   '/lots': typeof AppLotsRoute
   '/taches': typeof AppTachesRoute
   '/projets/$id': typeof AppProjetsIdRoute
@@ -91,6 +99,7 @@ export interface FileRoutesById {
   '/_app/artisans': typeof AppArtisansRoute
   '/_app/budget': typeof AppBudgetRoute
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/documents': typeof AppDocumentsRoute
   '/_app/lots': typeof AppLotsRoute
   '/_app/taches': typeof AppTachesRoute
   '/_app/projets/$id': typeof AppProjetsIdRoute
@@ -103,6 +112,7 @@ export interface FileRouteTypes {
     | '/artisans'
     | '/budget'
     | '/dashboard'
+    | '/documents'
     | '/lots'
     | '/taches'
     | '/projets/$id'
@@ -113,6 +123,7 @@ export interface FileRouteTypes {
     | '/artisans'
     | '/budget'
     | '/dashboard'
+    | '/documents'
     | '/lots'
     | '/taches'
     | '/projets/$id'
@@ -124,6 +135,7 @@ export interface FileRouteTypes {
     | '/_app/artisans'
     | '/_app/budget'
     | '/_app/dashboard'
+    | '/_app/documents'
     | '/_app/lots'
     | '/_app/taches'
     | '/_app/projets/$id'
@@ -163,6 +175,13 @@ declare module '@tanstack/react-router' {
       path: '/lots'
       fullPath: '/lots'
       preLoaderRoute: typeof AppLotsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/documents': {
+      id: '/_app/documents'
+      path: '/documents'
+      fullPath: '/documents'
+      preLoaderRoute: typeof AppDocumentsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/dashboard': {
@@ -207,6 +226,7 @@ interface AppRouteChildren {
   AppArtisansRoute: typeof AppArtisansRoute
   AppBudgetRoute: typeof AppBudgetRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppDocumentsRoute: typeof AppDocumentsRoute
   AppLotsRoute: typeof AppLotsRoute
   AppTachesRoute: typeof AppTachesRoute
   AppProjetsIdRoute: typeof AppProjetsIdRoute
@@ -217,6 +237,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppArtisansRoute: AppArtisansRoute,
   AppBudgetRoute: AppBudgetRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppDocumentsRoute: AppDocumentsRoute,
   AppLotsRoute: AppLotsRoute,
   AppTachesRoute: AppTachesRoute,
   AppProjetsIdRoute: AppProjetsIdRoute,
