@@ -3,6 +3,17 @@ import { lots as mockLots } from "@/lib/mock/data";
 import { supabase } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/supabase/types";
 
+async function fetchRetainedAmountsByProject(projectId: string): Promise<Map<string, number>> {
+  const { data } = await supabase
+    .from("quotes")
+    .select("lot_id, amount_cents")
+    .eq("project_id", projectId)
+    .eq("is_retained", true);
+  const map = new Map<string, number>();
+  for (const row of data ?? []) map.set(row.lot_id, row.amount_cents / 100);
+  return map;
+}
+
 function toLot(row: Tables<"lots">): Lot {
   return {
     id: row.id,
@@ -38,7 +49,8 @@ export async function getLotsByProject(projectId: string): Promise<Lot[]> {
     .eq("project_id", projectId)
     .order("sort_order");
   if (error || !data || data.length === 0) return mockLots.filter((l) => l.projectId === projectId);
-  return data.map(toLot);
+  const retainedAmounts = await fetchRetainedAmountsByProject(projectId);
+  return data.map((row) => ({ ...toLot(row), quoteReceived: retainedAmounts.get(row.id) ?? null }));
 }
 
 export async function getLotById(lotId: string): Promise<Lot | undefined> {

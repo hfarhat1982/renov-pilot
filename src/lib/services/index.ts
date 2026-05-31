@@ -6,3 +6,4 @@ export * from "./documents";
 export * from "./notes";
 export * from "./alerts";
 export * from "./decisions";
+export * from "./quotes";

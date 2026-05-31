@@ -1,3 +1,16 @@
+export interface Quote {
+  id: string;
+  projectId: string;
+  lotId: string;
+  artisanId: string | null;
+  artisanName: string;
+  amount: number;
+  quoteDate: string | null;
+  isRetained: boolean;
+  storagePath: string | null;
+  comment: string;
+}
+
 export type LotStatus =
   | "a_etudier"
   | "devis_demande"
