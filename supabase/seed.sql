@@ -16,9 +16,9 @@
 DO $$
 DECLARE
   -- ──────────────────────────────────────────────────────
-  -- !! REMPLACER PAR VOTRE UUID (Authentication > Users) !!
+  -- !! REMPLACER NULL PAR VOTRE UUID (Authentication > Users) !!
   -- ──────────────────────────────────────────────────────
-  v_owner_id uuid := 'REMPLACER-PAR-VOTRE-UUID'::uuid;
+  v_owner_id uuid := NULL;
 
   v_project_id uuid;
 
@@ -42,9 +42,9 @@ DECLARE
 BEGIN
 
   -- Vérification que le placeholder a été remplacé
-  IF v_owner_id::text = 'REMPLACER-PAR-VOTRE-UUID' THEN
+  IF v_owner_id IS NULL THEN
     RAISE EXCEPTION
-      'Remplacez REMPLACER-PAR-VOTRE-UUID par votre UUID utilisateur Supabase.';
+      'Remplacez NULL par votre UUID utilisateur Supabase avant d''exécuter le seed.';
   END IF;
 
   -- Idempotence : ne rien faire si le projet existe déjà
