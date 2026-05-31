@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/PageHeader";
 import { StatCard } from "@/components/StatCard";
@@ -22,12 +23,15 @@ import {
   AlertTriangle,
   CircleAlert,
   Plus,
+  Pencil,
 } from "lucide-react";
 import { formatEUR, RESERVE, budgetRiskLevelLabel } from "@/lib/mockData";
 import type { BudgetRiskLevel } from "@/lib/mockData";
 import { getBudgetScenarioStats } from "@/lib/mock/stats";
 import { getActiveProject, getProjectStats } from "@/lib/services/projects";
 import { getLotsByProject } from "@/lib/services/lots";
+import { FormAddDevis } from "@/components/forms/FormAddDevis";
+import { FormLotScenario } from "@/components/forms/FormLotScenario";
 
 export const Route = createFileRoute("/_app/budget")({
   head: () => ({ meta: [{ title: "Budget — RenoV Pilot" }] }),
@@ -66,8 +70,17 @@ function BudgetPage() {
     targetGapPessimistic,
   } = scenarioStats;
 
+  const [devisOpen, setDevisOpen] = useState(false);
+  const [scenarioOpen, setScenarioOpen] = useState(false);
+  const [activeLotId, setActiveLotId] = useState<string | undefined>();
+
   const totalQuoteMin = projectLots.reduce((s, l) => s + (l.quoteReceived ?? 0), 0);
   const totalReal = projectLots.reduce((s, l) => s + (l.realCost ?? 0), 0);
+
+  const openScenario = (id: string) => {
+    setActiveLotId(id);
+    setScenarioOpen(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -75,7 +88,7 @@ function BudgetPage() {
         title="Budget"
         description="Scénarios budgétaires et suivi des coûts par lot."
         actions={
-          <Button size="sm" variant="outline" disabled>
+          <Button size="sm" variant="outline" onClick={() => setDevisOpen(true)}>
             <Plus className="mr-1 h-4 w-4" />
             Ajouter devis
           </Button>
@@ -236,6 +249,7 @@ function BudgetPage() {
                   <TableHead className="text-right">Devis reçu</TableHead>
                   <TableHead className="text-right">Réel</TableHead>
                   <TableHead className="min-w-[160px]">Commentaire</TableHead>
+                  <TableHead className="w-10" />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -272,6 +286,17 @@ function BudgetPage() {
                     <TableCell className="text-xs text-muted-foreground">
                       {l.budgetComment ?? ""}
                     </TableCell>
+                    <TableCell className="p-1.5">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => openScenario(l.id)}
+                        title="Modifier le scénario"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -292,6 +317,7 @@ function BudgetPage() {
                     {formatEUR(totalQuoteMin)}
                   </TableCell>
                   <TableCell className="text-right tabular-nums">{formatEUR(totalReal)}</TableCell>
+                  <TableCell />
                   <TableCell />
                 </TableRow>
               </TableFooter>
@@ -344,6 +370,17 @@ function BudgetPage() {
               {l.budgetComment && (
                 <p className="text-xs text-muted-foreground">{l.budgetComment}</p>
               )}
+              <div className="border-t border-border/60 pt-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-full justify-start text-xs text-muted-foreground"
+                  onClick={() => openScenario(l.id)}
+                >
+                  <Pencil className="mr-1.5 h-3 w-3" />
+                  Modifier le scénario
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -364,6 +401,17 @@ function BudgetPage() {
           </div>
         </CardContent>
       </Card>
+
+      <FormAddDevis open={devisOpen} onOpenChange={setDevisOpen} lots={projectLots} />
+      <FormLotScenario
+        open={scenarioOpen}
+        onOpenChange={(v) => {
+          setScenarioOpen(v);
+          if (!v) setActiveLotId(undefined);
+        }}
+        lots={projectLots}
+        defaultLotId={activeLotId}
+      />
     </div>
   );
 }

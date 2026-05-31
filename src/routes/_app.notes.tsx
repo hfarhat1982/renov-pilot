@@ -27,13 +27,20 @@ import {
 import { getActiveProject } from "@/lib/services/projects";
 import { getDecisionsByProject } from "@/lib/services/decisions";
 import { getNotes } from "@/lib/services/notes";
+import { getLotsByProject } from "@/lib/services/lots";
+import { FormAddDecision } from "@/components/forms/FormAddDecision";
+import { FormAddPhoto } from "@/components/forms/FormAddPhoto";
 
 export const Route = createFileRoute("/_app/notes")({
   head: () => ({ meta: [{ title: "Décisions chantier — RenoV Pilot" }] }),
   loader: async () => {
     const project = await getActiveProject();
-    const [decisions, notes] = await Promise.all([getDecisionsByProject(project.id), getNotes()]);
-    return { decisions, notes };
+    const [decisions, notes, lots] = await Promise.all([
+      getDecisionsByProject(project.id),
+      getNotes(),
+      getLotsByProject(project.id),
+    ]);
+    return { decisions, notes, lots };
   },
   component: DecisionsPage,
 });
@@ -61,8 +68,10 @@ const noteMeta: Record<
 };
 
 function DecisionsPage() {
-  const { decisions, notes } = Route.useLoaderData();
+  const { decisions, notes, lots } = Route.useLoaderData();
   const [tab, setTab] = useState<"all" | DecisionStatus>("all");
+  const [decisionOpen, setDecisionOpen] = useState(false);
+  const [photoOpen, setPhotoOpen] = useState(false);
 
   const filtered = useMemo(
     () =>
@@ -88,11 +97,11 @@ function DecisionsPage() {
         description="Options envisagées, choix retenus, impact budget et planning pour chaque décision clé."
         actions={
           <>
-            <Button size="sm" variant="outline" disabled>
+            <Button size="sm" variant="outline" onClick={() => setDecisionOpen(true)}>
               <Plus className="mr-1 h-4 w-4" />
               Ajouter décision
             </Button>
-            <Button size="sm" variant="ghost" disabled>
+            <Button size="sm" variant="ghost" onClick={() => setPhotoOpen(true)}>
               <Camera className="mr-1 h-4 w-4" />
               Photo
             </Button>
@@ -279,6 +288,9 @@ function DecisionsPage() {
             })}
         </div>
       )}
+
+      <FormAddDecision open={decisionOpen} onOpenChange={setDecisionOpen} />
+      <FormAddPhoto open={photoOpen} onOpenChange={setPhotoOpen} lots={lots} />
     </div>
   );
 }

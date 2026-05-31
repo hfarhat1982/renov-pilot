@@ -13,11 +13,13 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { LotStatusBadge, PriorityBadge } from "@/components/StatusBadges";
-import { Plus } from "lucide-react";
+import { Plus, Pencil } from "lucide-react";
 import { formatEUR } from "@/lib/mockData";
 import { getActiveProject } from "@/lib/services/projects";
 import { getLotsByProject } from "@/lib/services/lots";
 import { getArtisans } from "@/lib/services/artisans";
+import { FormAddDevis } from "@/components/forms/FormAddDevis";
+import { FormLotStatus } from "@/components/forms/FormLotStatus";
 
 export const Route = createFileRoute("/_app/lots")({
   head: () => ({ meta: [{ title: "Lots travaux — RenoV Pilot" }] }),
@@ -32,6 +34,14 @@ export const Route = createFileRoute("/_app/lots")({
 function LotsPage() {
   const { lots, artisans } = Route.useLoaderData();
   const [q, setQ] = useState("");
+  const [devisOpen, setDevisOpen] = useState(false);
+  const [statusOpen, setStatusOpen] = useState(false);
+  const [activeLotId, setActiveLotId] = useState<string | undefined>();
+
+  const openStatus = (id: string) => {
+    setActiveLotId(id);
+    setStatusOpen(true);
+  };
   const filtered = lots.filter((l) => l.name.toLowerCase().includes(q.toLowerCase()));
   const artisanName = (id: string | null) =>
     id ? (artisans.find((a) => a.id === id)?.name ?? "—") : "—";
@@ -42,7 +52,7 @@ function LotsPage() {
         title="Lots travaux"
         description="Tous les corps d'état du projet, du devis à la réception."
         actions={
-          <Button size="sm" variant="outline" disabled>
+          <Button size="sm" variant="outline" onClick={() => setDevisOpen(true)}>
             <Plus className="mr-1 h-4 w-4" />
             Ajouter devis
           </Button>
@@ -70,6 +80,7 @@ function LotsPage() {
                 <TableHead className="text-right">Devis</TableHead>
                 <TableHead className="text-right">Réel</TableHead>
                 <TableHead>Artisan</TableHead>
+                <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -94,6 +105,17 @@ function LotsPage() {
                   <TableCell className="text-right tabular-nums">{formatEUR(l.realCost)}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {artisanName(l.artisanId)}
+                  </TableCell>
+                  <TableCell className="p-1.5">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => openStatus(l.id)}
+                      title="Modifier le statut"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -132,10 +154,32 @@ function LotsPage() {
                 </div>
               </div>
               {l.notes && <p className="text-xs text-muted-foreground">{l.notes}</p>}
+              <div className="border-t border-border/60 pt-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-full justify-start text-xs text-muted-foreground"
+                  onClick={() => openStatus(l.id)}
+                >
+                  <Pencil className="mr-1.5 h-3 w-3" />
+                  Modifier le statut
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ))}
       </div>
+
+      <FormAddDevis open={devisOpen} onOpenChange={setDevisOpen} lots={lots} />
+      <FormLotStatus
+        open={statusOpen}
+        onOpenChange={(v) => {
+          setStatusOpen(v);
+          if (!v) setActiveLotId(undefined);
+        }}
+        lots={lots}
+        defaultLotId={activeLotId}
+      />
     </div>
   );
 }

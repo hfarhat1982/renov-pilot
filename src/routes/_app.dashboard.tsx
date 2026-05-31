@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import {
   Wallet,
   TrendingDown,
@@ -23,6 +24,7 @@ import { getLotsByProject } from "@/lib/services/lots";
 import { getTasksByProject } from "@/lib/services/tasks";
 import { getAlerts } from "@/lib/services/alerts";
 import { getDecisionsByProject } from "@/lib/services/decisions";
+import { FormAddNote } from "@/components/forms/FormAddNote";
 
 export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({ meta: [{ title: "Tableau de bord — RenoV Pilot" }] }),
@@ -54,6 +56,7 @@ const alertTone = {
 
 function Dashboard() {
   const { project, stats, lots, tasks, alerts, decisions } = Route.useLoaderData();
+  const [noteOpen, setNoteOpen] = useState(false);
   const priorityOrder = { critique: 0, haute: 1, moyenne: 2, basse: 3 } as const;
   const urgentDecisions = decisions
     .filter((d) => d.status === "a_trancher")
@@ -80,11 +83,9 @@ function Dashboard() {
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </Button>
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/notes">
-                <Plus className="mr-1 h-4 w-4" />
-                Ajouter note
-              </Link>
+            <Button variant="ghost" size="sm" onClick={() => setNoteOpen(true)}>
+              <Plus className="mr-1 h-4 w-4" />
+              Ajouter note
             </Button>
           </>
         }
@@ -236,6 +237,7 @@ function Dashboard() {
           ))}
         </CardContent>
       </Card>
+      <FormAddNote open={noteOpen} onOpenChange={setNoteOpen} />
     </div>
   );
 }
