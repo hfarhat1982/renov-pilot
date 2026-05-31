@@ -1,4 +1,5 @@
 import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Separator } from "@/components/ui/separator";
@@ -25,6 +26,10 @@ function AppLayout() {
   const title =
     titles[pathname] ?? (pathname.startsWith("/projets/") ? "Détail projet" : "RenoV Pilot");
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [pathname]);
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">
@@ -42,7 +47,7 @@ function AppLayout() {
           </main>
         </SidebarInset>
       </div>
-      <Toaster richColors position="bottom-right" />
+      <Toaster richColors position="bottom-center" />
     </SidebarProvider>
   );
 }

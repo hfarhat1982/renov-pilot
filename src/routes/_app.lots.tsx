@@ -70,57 +70,61 @@ function LotsPage() {
       {/* Desktop table */}
       <Card className="hidden border-border/60 shadow-sm md:block">
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Lot</TableHead>
-                <TableHead>Statut</TableHead>
-                <TableHead>Priorité</TableHead>
-                <TableHead className="text-right">Prévu</TableHead>
-                <TableHead className="text-right">Devis</TableHead>
-                <TableHead className="text-right">Réel</TableHead>
-                <TableHead>Artisan</TableHead>
-                <TableHead className="w-10" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map((l) => (
-                <TableRow key={l.id}>
-                  <TableCell>
-                    <div className="font-medium">{l.name}</div>
-                    {l.notes && <div className="text-xs text-muted-foreground">{l.notes}</div>}
-                  </TableCell>
-                  <TableCell>
-                    <LotStatusBadge status={l.status} />
-                  </TableCell>
-                  <TableCell>
-                    <PriorityBadge priority={l.priority} />
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {formatEUR(l.budgetPlanned)}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {formatEUR(l.quoteReceived)}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">{formatEUR(l.realCost)}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {artisanName(l.artisanId)}
-                  </TableCell>
-                  <TableCell className="p-1.5">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7"
-                      onClick={() => openStatus(l.id)}
-                      title="Modifier le statut"
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </Button>
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Lot</TableHead>
+                  <TableHead>Statut</TableHead>
+                  <TableHead>Priorité</TableHead>
+                  <TableHead className="text-right">Prévu</TableHead>
+                  <TableHead className="text-right">Devis</TableHead>
+                  <TableHead className="text-right">Réel</TableHead>
+                  <TableHead>Artisan</TableHead>
+                  <TableHead className="w-10" />
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((l) => (
+                  <TableRow key={l.id}>
+                    <TableCell>
+                      <div className="font-medium">{l.name}</div>
+                      {l.notes && <div className="text-xs text-muted-foreground">{l.notes}</div>}
+                    </TableCell>
+                    <TableCell>
+                      <LotStatusBadge status={l.status} />
+                    </TableCell>
+                    <TableCell>
+                      <PriorityBadge priority={l.priority} />
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {formatEUR(l.budgetPlanned)}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {formatEUR(l.quoteReceived)}
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {formatEUR(l.realCost)}
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      {artisanName(l.artisanId)}
+                    </TableCell>
+                    <TableCell className="p-1.5">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={() => openStatus(l.id)}
+                        title="Modifier le statut"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 

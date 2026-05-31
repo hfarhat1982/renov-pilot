@@ -68,6 +68,7 @@ export function FormAddNote({ open, onOpenChange }: FormAddNoteProps) {
               placeholder="Titre de la note"
               value={fields.title}
               onChange={(e) => setFields({ ...fields, title: e.target.value })}
+              autoFocus
             />
           </div>
 

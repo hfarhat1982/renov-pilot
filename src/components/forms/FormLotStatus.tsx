@@ -116,6 +116,7 @@ export function FormLotStatus({ open, onOpenChange, lots, defaultLotId }: FormLo
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               rows={2}
+              autoFocus
             />
           </div>
         </div>

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -281,6 +281,7 @@ const ACTIONS: Action[] = [
 function CopilotPage() {
   const [active, setActive] = useState<ActionId | null>(null);
   const [loading, setLoading] = useState(false);
+  const resultRef = useRef<HTMLDivElement>(null);
 
   const action = active ? ACTIONS.find((a) => a.id === active)! : null;
 
@@ -289,6 +290,12 @@ function CopilotPage() {
     setActive(id);
     setTimeout(() => setLoading(false), 700);
   };
+
+  useEffect(() => {
+    if (!loading && active && resultRef.current) {
+      resultRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [loading, active]);
 
   return (
     <div className="space-y-6">
@@ -312,7 +319,7 @@ function CopilotPage() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
         {ACTIONS.map((a) => {
           const Icon = a.icon;
           const isActive = active === a.id;
@@ -337,51 +344,53 @@ function CopilotPage() {
       </div>
 
       {action && (
-        <Card className="border-border/60 shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Sparkles className="h-4 w-4 text-primary" />
-              {action.response.heading}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Le copilote analyse votre projet…
-              </div>
-            ) : (
-              <div className="space-y-5">
-                {action.response.sections.map((s, i) => (
-                  <div key={i}>
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      {s.title}
-                    </p>
-                    <ul className="space-y-1.5">
-                      {s.items.map((it, j) => (
-                        <li key={j} className="flex items-start gap-2 text-sm">
-                          <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
-                          <span>{it}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-                <div className="flex flex-wrap gap-2 border-t border-border/60 pt-4">
-                  <Button size="sm" variant="outline" disabled>
-                    Copier
-                  </Button>
-                  <Button size="sm" variant="outline" disabled>
-                    Envoyer par email
-                  </Button>
-                  <Button size="sm" variant="outline" disabled>
-                    Ajouter aux notes
-                  </Button>
+        <div ref={resultRef}>
+          <Card className="border-border/60 shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Sparkles className="h-4 w-4 text-primary" />
+                {action.response.heading}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Le copilote analyse votre projet…
                 </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              ) : (
+                <div className="space-y-5">
+                  {action.response.sections.map((s, i) => (
+                    <div key={i}>
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {s.title}
+                      </p>
+                      <ul className="space-y-1.5">
+                        {s.items.map((it, j) => (
+                          <li key={j} className="flex items-start gap-2 text-sm">
+                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
+                            <span>{it}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                  <div className="flex flex-wrap gap-2 border-t border-border/60 pt-4 opacity-40 pointer-events-none select-none">
+                    <Button size="sm" variant="outline" disabled>
+                      Copier
+                    </Button>
+                    <Button size="sm" variant="outline" disabled>
+                      Email
+                    </Button>
+                    <Button size="sm" variant="outline" disabled>
+                      Ajouter aux notes
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );

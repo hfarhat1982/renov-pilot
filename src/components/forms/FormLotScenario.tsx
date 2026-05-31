@@ -104,7 +104,7 @@ export function FormLotScenario({ open, onOpenChange, lots, defaultLotId }: Form
             </Select>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div className="grid gap-1.5">
               <Label htmlFor="scen-opt" className="text-success text-xs">
                 Optimiste (€)
@@ -115,6 +115,7 @@ export function FormLotScenario({ open, onOpenChange, lots, defaultLotId }: Form
                 placeholder="ex : 1 200"
                 value={optimistic}
                 onChange={(e) => setOptimistic(e.target.value)}
+                autoFocus
               />
             </div>
             <div className="grid gap-1.5">

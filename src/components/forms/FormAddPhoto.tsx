@@ -116,6 +116,7 @@ export function FormAddPhoto({ open, onOpenChange, lots }: FormAddPhotoProps) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
+              autoFocus
             />
           </div>
 

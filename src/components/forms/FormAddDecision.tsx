@@ -83,6 +83,7 @@ export function FormAddDecision({ open, onOpenChange }: FormAddDecisionProps) {
               placeholder="Intitulé de la décision"
               value={fields.title}
               onChange={(e) => setFields({ ...fields, title: e.target.value })}
+              autoFocus
             />
           </div>
 

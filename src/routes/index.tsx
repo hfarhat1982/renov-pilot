@@ -78,9 +78,8 @@ function Landing() {
               MVP — démonstration projet sous-sol
             </span>
             <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-              Pilotez vos projets de rénovation,
-              <br />
-              <span className="text-primary">sans rien oublier.</span>
+              Pilotez vos projets de rénovation,{" "}
+              <span className="text-primary sm:block">sans rien oublier.</span>
             </h1>
             <p className="text-lg text-muted-foreground">
               RenoV Pilot rassemble vos lots, votre budget, vos artisans, vos devis et vos documents
@@ -112,7 +111,7 @@ function Landing() {
             habitable.
           </p>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {features.map((f) => (
             <div key={f.title} className="rounded-xl border border-border/60 bg-card p-5">
               <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-md bg-primary/10 text-primary">

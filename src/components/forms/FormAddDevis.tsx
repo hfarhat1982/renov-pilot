@@ -92,6 +92,7 @@ export function FormAddDevis({ open, onOpenChange, lots, defaultLotId }: FormAdd
               placeholder="Nom de l'artisan ou de l'entreprise"
               value={artisan}
               onChange={(e) => setArtisan(e.target.value)}
+              autoFocus
             />
           </div>
 
