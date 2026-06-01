@@ -40,7 +40,7 @@ const mainItems = [
 const secondaryItems = [
   { title: "Artisans", url: "/artisans", icon: HardHat },
   { title: "Documents & photos", url: "/documents", icon: FileText },
-  { title: "Décisions", url: "/notes", icon: StickyNote },
+  { title: "Journal chantier", url: "/notes", icon: StickyNote },
   { title: "Copilote IA", url: "/copilote", icon: Sparkles },
 ];
 
