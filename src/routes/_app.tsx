@@ -1,9 +1,10 @@
-import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { Separator } from "@/components/ui/separator";
 import { Toaster } from "@/components/ui/sonner";
+import { getCurrentSession } from "@/lib/services/auth";
 
 export const Route = createFileRoute("/_app")({
   component: AppLayout,
@@ -22,13 +23,35 @@ const titles: Record<string, string> = {
 };
 
 function AppLayout() {
+  const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const title =
     titles[pathname] ?? (pathname.startsWith("/projets/") ? "Détail projet" : "RenoV Pilot");
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    getCurrentSession()
+      .then((session) => {
+        if (!session) {
+          navigate({ to: "/login" });
+        } else {
+          setChecking(false);
+        }
+      })
+      .catch(() => navigate({ to: "/login" }));
+  }, [navigate]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "instant" });
   }, [pathname]);
+
+  if (checking) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
     <SidebarProvider>
