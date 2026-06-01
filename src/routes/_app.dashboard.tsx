@@ -19,17 +19,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { formatDate, formatEUR, projectStatusLabel } from "@/lib/mockData";
-import { getActiveProject, getProjectStats } from "@/lib/services/projects";
+import { getSupabaseProjectsOnly, getProjectStats } from "@/lib/services/projects";
 import { getLotsByProject } from "@/lib/services/lots";
 import { getTasksByProject } from "@/lib/services/tasks";
 import { getAlerts } from "@/lib/services/alerts";
 import { getDecisionsByProject } from "@/lib/services/decisions";
 import { FormAddNote } from "@/components/forms/FormAddNote";
+import { FormCreateProject } from "@/components/forms/FormCreateProject";
 
 export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({ meta: [{ title: "Tableau de bord — RenoV Pilot" }] }),
   loader: async () => {
-    const project = await getActiveProject();
+    const projects = await getSupabaseProjectsOnly();
+    if (projects.length === 0) return { noProject: true as const };
+    const project = projects[0];
     const [stats, lots, tasks, alerts, decisions] = await Promise.all([
       getProjectStats(project.id),
       getLotsByProject(project.id),
@@ -37,7 +40,7 @@ export const Route = createFileRoute("/_app/dashboard")({
       getAlerts(),
       getDecisionsByProject(project.id),
     ]);
-    return { project, stats, lots, tasks, alerts, decisions };
+    return { noProject: false as const, project, stats, lots, tasks, alerts, decisions };
   },
   component: Dashboard,
 });
@@ -55,8 +58,12 @@ const alertTone = {
 } as const;
 
 function Dashboard() {
-  const { project, stats, lots, tasks, alerts, decisions } = Route.useLoaderData();
+  const data = Route.useLoaderData();
   const [noteOpen, setNoteOpen] = useState(false);
+
+  if (data.noProject) return <FormCreateProject />;
+
+  const { project, stats, lots, tasks, alerts, decisions } = data;
   const priorityOrder = { critique: 0, haute: 1, moyenne: 2, basse: 3 } as const;
   const urgentDecisions = decisions
     .filter((d) => d.status === "a_trancher")
