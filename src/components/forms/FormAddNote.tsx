@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useRouter } from "@tanstack/react-router";
 import {
   Dialog,
   DialogContent,
@@ -19,10 +20,12 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import type { Note, Priority } from "@/lib/types";
+import { createNote } from "@/lib/services/notes";
 
 interface FormAddNoteProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  projectId: string;
 }
 
 const defaultState = {
@@ -32,15 +35,31 @@ const defaultState = {
   priority: "moyenne" as Priority,
 };
 
-export function FormAddNote({ open, onOpenChange }: FormAddNoteProps) {
+export function FormAddNote({ open, onOpenChange, projectId }: FormAddNoteProps) {
+  const router = useRouter();
   const [fields, setFields] = useState(defaultState);
+  const [loading, setLoading] = useState(false);
 
   const reset = () => setFields(defaultState);
 
-  const handleSubmit = () => {
-    toast.success("Note ajoutée — sera persistée avec Supabase.");
-    reset();
-    onOpenChange(false);
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      await createNote({
+        title: fields.title,
+        body: fields.body,
+        note_type: fields.type,
+        project_id: projectId,
+      });
+      toast.success("Note ajoutée.");
+      reset();
+      onOpenChange(false);
+      router.invalidate();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur lors de l'ajout de la note.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -55,10 +74,6 @@ export function FormAddNote({ open, onOpenChange }: FormAddNoteProps) {
         <DialogHeader>
           <DialogTitle>Ajouter une note</DialogTitle>
         </DialogHeader>
-
-        <div className="rounded-md bg-secondary/60 px-3 py-2 text-xs text-muted-foreground">
-          Action simulée — sera persistée avec Supabase.
-        </div>
 
         <div className="grid gap-4">
           <div className="grid gap-1.5">
@@ -130,8 +145,8 @@ export function FormAddNote({ open, onOpenChange }: FormAddNoteProps) {
           >
             Annuler
           </Button>
-          <Button onClick={handleSubmit} disabled={!fields.title.trim()}>
-            Ajouter la note
+          <Button onClick={handleSubmit} disabled={!fields.title.trim() || loading}>
+            {loading ? "Enregistrement…" : "Ajouter la note"}
           </Button>
         </DialogFooter>
       </DialogContent>

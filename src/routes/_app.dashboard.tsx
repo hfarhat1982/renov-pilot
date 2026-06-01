@@ -237,7 +237,7 @@ function Dashboard() {
           ))}
         </CardContent>
       </Card>
-      <FormAddNote open={noteOpen} onOpenChange={setNoteOpen} />
+      <FormAddNote open={noteOpen} onOpenChange={setNoteOpen} projectId={project.id} />
     </div>
   );
 }
