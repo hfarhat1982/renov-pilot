@@ -4,6 +4,16 @@ import { supabase } from "@/lib/supabase/client";
 import { getCurrentUser } from "@/lib/services/auth";
 import type { Tables } from "@/lib/supabase/types";
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function assertUuid(id: string, label: string): void {
+  if (!UUID_RE.test(id)) {
+    throw new Error(
+      `Projet Supabase introuvable. Rechargez la page ou reconnectez-vous. (${label}: "${id}")`,
+    );
+  }
+}
+
 function toNote(row: Tables<"notes">): Note {
   return {
     id: row.id,
@@ -30,6 +40,8 @@ export async function createNote(input: {
   note_type: Note["type"];
   project_id: string;
 }): Promise<Note> {
+  assertUuid(input.project_id, "project_id");
+
   const user = await getCurrentUser();
   if (!user) throw new Error("Non authentifié");
 
