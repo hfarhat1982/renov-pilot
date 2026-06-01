@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -10,7 +10,10 @@ import {
   Sparkles,
   Hammer,
   Home,
+  LogOut,
 } from "lucide-react";
+import { toast } from "sonner";
+import { signOut } from "@/lib/services/auth";
 
 import {
   Sidebar,
@@ -45,6 +48,14 @@ export function AppSidebar() {
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
   const isActive = (url: string) => currentPath === url || currentPath.startsWith(url + "/");
   const { setOpenMobile } = useSidebar();
+  const navigate = useNavigate();
+
+  async function handleSignOut() {
+    setOpenMobile(false);
+    await signOut();
+    toast.success("Déconnecté");
+    navigate({ to: "/login" });
+  }
 
   return (
     <Sidebar collapsible="icon">
@@ -107,7 +118,15 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="px-2 py-2 text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={handleSignOut} tooltip="Déconnexion">
+              <LogOut className="h-4 w-4" />
+              <span>Déconnexion</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+        <div className="px-2 py-1 text-xs text-muted-foreground group-data-[collapsible=icon]:hidden">
           MVP · Données fictives
         </div>
       </SidebarFooter>
