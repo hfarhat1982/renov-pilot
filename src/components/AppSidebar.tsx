@@ -1,4 +1,5 @@
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -14,6 +15,16 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { signOut } from "@/lib/services/auth";
+import { getSupabaseProjectsOnly } from "@/lib/services/projects";
+import { getStoredProjectId, storeProjectId } from "@/lib/activeProject";
+import type { Project } from "@/lib/types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import {
   Sidebar,
@@ -49,6 +60,24 @@ export function AppSidebar() {
   const isActive = (url: string) => currentPath === url || currentPath.startsWith(url + "/");
   const { setOpenMobile } = useSidebar();
   const navigate = useNavigate();
+  const router = useRouter();
+
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [activeId, setActiveId] = useState<string>("");
+
+  useEffect(() => {
+    getSupabaseProjectsOnly().then((ps) => {
+      setProjects(ps);
+      const stored = getStoredProjectId();
+      setActiveId(stored ?? ps[0]?.id ?? "");
+    });
+  }, []);
+
+  function handleProjectChange(id: string) {
+    storeProjectId(id);
+    setActiveId(id);
+    router.invalidate();
+  }
 
   async function handleSignOut() {
     setOpenMobile(false);
@@ -69,6 +98,23 @@ export function AppSidebar() {
             <span className="text-xs text-muted-foreground">Pilotage de chantier</span>
           </div>
         </Link>
+        {projects.length > 0 && (
+          <div className="px-2 pb-1 group-data-[collapsible=icon]:hidden">
+            <p className="mb-1 text-xs text-muted-foreground">Projet actif</p>
+            <Select value={activeId} onValueChange={handleProjectChange}>
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue placeholder="Choisir un projet" />
+              </SelectTrigger>
+              <SelectContent>
+                {projects.map((p) => (
+                  <SelectItem key={p.id} value={p.id} className="text-xs">
+                    {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </SidebarHeader>
 
       <SidebarContent>

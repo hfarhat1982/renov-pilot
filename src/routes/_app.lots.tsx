@@ -15,24 +15,28 @@ import { Input } from "@/components/ui/input";
 import { LotStatusBadge, PriorityBadge } from "@/components/StatusBadges";
 import { Plus, Pencil } from "lucide-react";
 import { formatEUR } from "@/lib/mockData";
-import { getActiveProject } from "@/lib/services/projects";
+import { resolveActiveProject } from "@/lib/services/projects";
 import { getLotsByProject } from "@/lib/services/lots";
 import { getArtisans } from "@/lib/services/artisans";
+import { NoProjectState } from "@/components/NoProjectState";
 import { FormAddDevis } from "@/components/forms/FormAddDevis";
 import { FormLotStatus } from "@/components/forms/FormLotStatus";
 
 export const Route = createFileRoute("/_app/lots")({
   head: () => ({ meta: [{ title: "Lots travaux — RenoV Pilot" }] }),
   loader: async () => {
-    const project = await getActiveProject();
+    const project = await resolveActiveProject();
+    if (!project) return { noProject: true as const };
     const [lots, artisans] = await Promise.all([getLotsByProject(project.id), getArtisans()]);
-    return { lots, artisans };
+    return { noProject: false as const, lots, artisans };
   },
   component: LotsPage,
 });
 
 function LotsPage() {
-  const { lots, artisans } = Route.useLoaderData();
+  const data = Route.useLoaderData();
+  if (data.noProject) return <NoProjectState />;
+  const { lots, artisans } = data;
   const [q, setQ] = useState("");
   const [devisOpen, setDevisOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);

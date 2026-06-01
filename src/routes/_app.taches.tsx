@@ -6,14 +6,31 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PriorityBadge, TaskStatusBadge } from "@/components/StatusBadges";
 import { Calendar, User } from "lucide-react";
-import { formatDate, lots, tasks, type TaskStatus } from "@/lib/mockData";
+import { formatDate, type TaskStatus } from "@/lib/mockData";
+import { resolveActiveProject } from "@/lib/services/projects";
+import { getTasksByProject } from "@/lib/services/tasks";
+import { getLotsByProject } from "@/lib/services/lots";
+import { NoProjectState } from "@/components/NoProjectState";
 
 export const Route = createFileRoute("/_app/taches")({
   head: () => ({ meta: [{ title: "Tâches — RenoV Pilot" }] }),
+  loader: async () => {
+    const project = await resolveActiveProject();
+    if (!project) return { noProject: true as const };
+    const [tasks, lots] = await Promise.all([
+      getTasksByProject(project.id),
+      getLotsByProject(project.id),
+    ]);
+    return { noProject: false as const, tasks, lots };
+  },
   component: TasksPage,
 });
 
 function TasksPage() {
+  const data = Route.useLoaderData();
+  if (data.noProject) return <NoProjectState />;
+  const { tasks, lots } = data;
+
   const [q, setQ] = useState("");
   const [tab, setTab] = useState<"all" | TaskStatus>("all");
 
@@ -22,7 +39,7 @@ function TasksPage() {
       .filter((t) => (tab === "all" ? true : t.status === tab))
       .filter((t) => t.title.toLowerCase().includes(q.toLowerCase()))
       .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
-  }, [q, tab]);
+  }, [tasks, q, tab]);
 
   const lotName = (id: string | null) => (id ? (lots.find((l) => l.id === id)?.name ?? "—") : "—");
 
@@ -78,7 +95,7 @@ function TasksPage() {
         ))}
         {filtered.length === 0 && (
           <p className="py-12 text-center text-sm text-muted-foreground">
-            Aucune tâche pour ce filtre.
+            {tasks.length === 0 ? "Aucune tâche pour ce projet." : "Aucune tâche pour ce filtre."}
           </p>
         )}
       </div>

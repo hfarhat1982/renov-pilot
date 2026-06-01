@@ -19,7 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { formatDate, formatEUR, projectStatusLabel } from "@/lib/mockData";
-import { getSupabaseProjectsOnly, getProjectStats } from "@/lib/services/projects";
+import { resolveActiveProject, getProjectStats } from "@/lib/services/projects";
 import { getLotsByProject } from "@/lib/services/lots";
 import { getTasksByProject } from "@/lib/services/tasks";
 import { getAlerts } from "@/lib/services/alerts";
@@ -30,9 +30,8 @@ import { FormCreateProject } from "@/components/forms/FormCreateProject";
 export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({ meta: [{ title: "Tableau de bord — RenoV Pilot" }] }),
   loader: async () => {
-    const projects = await getSupabaseProjectsOnly();
-    if (projects.length === 0) return { noProject: true as const };
-    const project = projects[0];
+    const project = await resolveActiveProject();
+    if (!project) return { noProject: true as const };
     const [stats, lots, tasks, alerts, decisions] = await Promise.all([
       getProjectStats(project.id),
       getLotsByProject(project.id),

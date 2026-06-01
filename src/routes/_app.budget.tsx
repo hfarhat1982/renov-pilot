@@ -28,7 +28,8 @@ import {
 import { formatEUR, RESERVE, budgetRiskLevelLabel } from "@/lib/mockData";
 import type { BudgetRiskLevel } from "@/lib/mockData";
 import { getBudgetScenarioStats } from "@/lib/mock/stats";
-import { getActiveProject, getProjectStats } from "@/lib/services/projects";
+import { resolveActiveProject, getProjectStats } from "@/lib/services/projects";
+import { NoProjectState } from "@/components/NoProjectState";
 import { getLotsByProject } from "@/lib/services/lots";
 import { FormAddDevis } from "@/components/forms/FormAddDevis";
 import { FormLotScenario } from "@/components/forms/FormLotScenario";
@@ -36,13 +37,14 @@ import { FormLotScenario } from "@/components/forms/FormLotScenario";
 export const Route = createFileRoute("/_app/budget")({
   head: () => ({ meta: [{ title: "Budget — RenoV Pilot" }] }),
   loader: async () => {
-    const project = await getActiveProject();
+    const project = await resolveActiveProject();
+    if (!project) return { noProject: true as const };
     const [lots, stats] = await Promise.all([
       getLotsByProject(project.id),
       getProjectStats(project.id),
     ]);
     const scenarioStats = getBudgetScenarioStats(lots, RESERVE, project.budgetTarget);
-    return { project, lots, stats, scenarioStats };
+    return { noProject: false as const, project, lots, stats, scenarioStats };
   },
   component: BudgetPage,
 });
@@ -59,7 +61,9 @@ function fmtScenario(v: number | null): string {
 }
 
 function BudgetPage() {
-  const { project, lots: projectLots, stats, scenarioStats } = Route.useLoaderData();
+  const data = Route.useLoaderData();
+  if (data.noProject) return <NoProjectState />;
+  const { project, lots: projectLots, stats, scenarioStats } = data;
   const {
     optimisticTotal,
     retainedTotal,

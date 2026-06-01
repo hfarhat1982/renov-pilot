@@ -23,6 +23,16 @@ export async function getArtisans(): Promise<Artisan[]> {
   return data.map(toArtisan);
 }
 
+export async function getArtisansByProject(projectId: string): Promise<Artisan[]> {
+  const { data, error } = await supabase
+    .from("artisans")
+    .select("*")
+    .eq("project_id", projectId)
+    .order("name");
+  if (error || !data) return [];
+  return data.map(toArtisan);
+}
+
 export async function getArtisanById(artisanId: string): Promise<Artisan | undefined> {
   const { data, error } = await supabase
     .from("artisans")

@@ -6,20 +6,33 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Image as ImageIcon, Download, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { documentCategoryLabel, documents, formatDate, type DocumentItem } from "@/lib/mockData";
+import { documentCategoryLabel, formatDate, type DocumentItem } from "@/lib/mockData";
+import { resolveActiveProject } from "@/lib/services/projects";
+import { getDocumentsByProjectOnly } from "@/lib/services/documents";
+import { NoProjectState } from "@/components/NoProjectState";
 
 export const Route = createFileRoute("/_app/documents")({
   head: () => ({ meta: [{ title: "Documents — RenoV Pilot" }] }),
+  loader: async () => {
+    const project = await resolveActiveProject();
+    if (!project) return { noProject: true as const };
+    const documents = await getDocumentsByProjectOnly(project.id);
+    return { noProject: false as const, documents };
+  },
   component: DocumentsPage,
 });
 
 type Cat = DocumentItem["category"] | "all";
 
 function DocumentsPage() {
+  const data = Route.useLoaderData();
+  if (data.noProject) return <NoProjectState />;
+  const { documents } = data;
+
   const [cat, setCat] = useState<Cat>("all");
   const filtered = useMemo(
     () => documents.filter((d) => cat === "all" || d.category === cat),
-    [cat],
+    [documents, cat],
   );
 
   const cats: Cat[] = [
@@ -83,7 +96,9 @@ function DocumentsPage() {
         })}
         {filtered.length === 0 && (
           <p className="col-span-full py-12 text-center text-sm text-muted-foreground">
-            Aucun document dans cette catégorie.
+            {documents.length === 0
+              ? "Aucun document pour ce projet."
+              : "Aucun document dans cette catégorie."}
           </p>
         )}
       </div>

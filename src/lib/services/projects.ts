@@ -3,6 +3,7 @@ import { projects as mockProjects } from "@/lib/mock/data";
 import { getProjectStats as computeProjectStats } from "@/lib/mock/stats";
 import { supabase } from "@/lib/supabase/client";
 import { getCurrentUser } from "@/lib/services/auth";
+import { getStoredProjectId, isUuid, storeProjectId } from "@/lib/activeProject";
 import type { Tables } from "@/lib/supabase/types";
 
 function toProject(row: Tables<"projects">): Project {
@@ -49,6 +50,18 @@ export async function getActiveProject(): Promise<Project> {
 
 export async function getProjectStats(projectId: string) {
   return computeProjectStats(projectId);
+}
+
+export async function resolveActiveProject(): Promise<Project | null> {
+  const storedId = getStoredProjectId();
+  if (storedId) {
+    const project = await getProjectById(storedId);
+    if (project && isUuid(project.id)) return project;
+  }
+  const projects = await getSupabaseProjectsOnly();
+  if (projects.length === 0) return null;
+  storeProjectId(projects[0].id);
+  return projects[0];
 }
 
 export async function getSupabaseProjectsOnly(): Promise<Project[]> {

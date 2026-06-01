@@ -43,6 +43,16 @@ export async function getDocumentsByCategory(
   return data.map(toDocument);
 }
 
+export async function getDocumentsByProjectOnly(projectId: string): Promise<DocumentItem[]> {
+  const { data, error } = await supabase
+    .from("documents")
+    .select("*")
+    .eq("project_id", projectId)
+    .order("uploaded_at", { ascending: false });
+  if (error || !data) return [];
+  return data.map(toDocument);
+}
+
 // DocumentItem n'a pas de champ projectId côté frontend — filtre en base, retourne tout si vide.
 export async function getDocumentsByProject(projectId: string): Promise<DocumentItem[]> {
   const { data, error } = await supabase

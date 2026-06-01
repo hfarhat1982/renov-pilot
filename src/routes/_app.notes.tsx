@@ -24,7 +24,8 @@ import {
   type Priority,
   type Note,
 } from "@/lib/mockData";
-import { getActiveProject } from "@/lib/services/projects";
+import { resolveActiveProject } from "@/lib/services/projects";
+import { NoProjectState } from "@/components/NoProjectState";
 import { getDecisionsByProject } from "@/lib/services/decisions";
 import { getNotes } from "@/lib/services/notes";
 import { getLotsByProject } from "@/lib/services/lots";
@@ -35,13 +36,14 @@ import { FormAddNote } from "@/components/forms/FormAddNote";
 export const Route = createFileRoute("/_app/notes")({
   head: () => ({ meta: [{ title: "Journal chantier — RenoV Pilot" }] }),
   loader: async () => {
-    const project = await getActiveProject();
+    const project = await resolveActiveProject();
+    if (!project) return { noProject: true as const };
     const [decisions, notes, lots] = await Promise.all([
       getDecisionsByProject(project.id),
       getNotes(),
       getLotsByProject(project.id),
     ]);
-    return { project, decisions, notes, lots };
+    return { noProject: false as const, project, decisions, notes, lots };
   },
   component: DecisionsPage,
 });
@@ -69,7 +71,9 @@ const noteMeta: Record<
 };
 
 function DecisionsPage() {
-  const { project, decisions, notes, lots } = Route.useLoaderData();
+  const data = Route.useLoaderData();
+  if (data.noProject) return <NoProjectState />;
+  const { project, decisions, notes, lots } = data;
   const [mainTab, setMainTab] = useState<"decisions" | "notes">("decisions");
   const [decisionFilter, setDecisionFilter] = useState<"all" | DecisionStatus>("all");
   const [decisionOpen, setDecisionOpen] = useState(false);
