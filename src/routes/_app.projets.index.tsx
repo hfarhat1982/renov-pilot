@@ -79,7 +79,7 @@ function ProjectsList() {
                 </div>
               </div>
               <Button asChild variant="outline" size="sm" className="w-full">
-                <Link to="/projets/$id" params={{ id: p.id }}>
+                <Link to="/projets/$id/dashboard" params={{ id: p.id }}>
                   Ouvrir le projet
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </Link>

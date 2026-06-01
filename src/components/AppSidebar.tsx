@@ -1,17 +1,8 @@
 import { Link, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
-  LayoutDashboard,
-  FolderKanban,
-  ListChecks,
-  Wallet,
-  HardHat,
-  FileText,
-  StickyNote,
-  Sparkles,
-  Hammer,
-  Home,
-  LogOut,
+  LayoutDashboard, FolderKanban, ListChecks, Wallet,
+  HardHat, FileText, StickyNote, Sparkles, Hammer, Home, LogOut,
 } from "lucide-react";
 import { toast } from "sonner";
 import { signOut } from "@/lib/services/auth";
@@ -19,45 +10,31 @@ import { getSupabaseProjectsOnly } from "@/lib/services/projects";
 import { getStoredProjectId, storeProjectId } from "@/lib/activeProject";
 import type { Project } from "@/lib/types";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
+  Sidebar, SidebarContent, SidebarFooter, SidebarGroup,
+  SidebarGroupContent, SidebarGroupLabel, SidebarHeader,
+  SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar,
 } from "@/components/ui/sidebar";
 
-const mainItems = [
-  { title: "Tableau de bord", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Projets", url: "/projets", icon: FolderKanban },
-  { title: "Lots travaux", url: "/lots", icon: Hammer },
-  { title: "Tâches", url: "/taches", icon: ListChecks },
-  { title: "Budget", url: "/budget", icon: Wallet },
+type Section = "dashboard" | "lots" | "taches" | "budget" | "artisans" | "documents" | "journal";
+
+const mainSections: { title: string; section: Section; icon: typeof LayoutDashboard }[] = [
+  { title: "Tableau de bord", section: "dashboard", icon: LayoutDashboard },
+  { title: "Lots travaux", section: "lots", icon: Hammer },
+  { title: "Tâches", section: "taches", icon: ListChecks },
+  { title: "Budget", section: "budget", icon: Wallet },
 ];
 
-const secondaryItems = [
-  { title: "Artisans", url: "/artisans", icon: HardHat },
-  { title: "Documents & photos", url: "/documents", icon: FileText },
-  { title: "Journal chantier", url: "/notes", icon: StickyNote },
-  { title: "Copilote IA", url: "/copilote", icon: Sparkles },
+const resourceSections: { title: string; section: Section; icon: typeof LayoutDashboard }[] = [
+  { title: "Artisans", section: "artisans", icon: HardHat },
+  { title: "Documents & photos", section: "documents", icon: FileText },
+  { title: "Journal chantier", section: "journal", icon: StickyNote },
 ];
 
 export function AppSidebar() {
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
-  const isActive = (url: string) => currentPath === url || currentPath.startsWith(url + "/");
   const { setOpenMobile } = useSidebar();
   const navigate = useNavigate();
   const router = useRouter();
@@ -76,7 +53,9 @@ export function AppSidebar() {
   function handleProjectChange(id: string) {
     storeProjectId(id);
     setActiveId(id);
-    router.invalidate();
+    const sectionMatch = currentPath.match(/\/projets\/[^/]+\/([^/]+)/);
+    const section = (sectionMatch?.[1] as Section | undefined) ?? "dashboard";
+    navigate({ to: `/projets/${id}/${section}` as any });
   }
 
   async function handleSignOut() {
@@ -84,6 +63,27 @@ export function AppSidebar() {
     await signOut();
     toast.success("Déconnecté");
     navigate({ to: "/login" });
+  }
+
+  const isProjectSection = (section: Section) =>
+    activeId
+      ? currentPath === `/projets/${activeId}/${section}` ||
+        currentPath.startsWith(`/projets/${activeId}/${section}/`)
+      : false;
+
+  function ProjectSectionLink({ section, children }: { section: Section; children: React.ReactNode }) {
+    if (activeId) {
+      return (
+        <Link to={`/projets/${activeId}/${section}` as any} onClick={() => setOpenMobile(false)}>
+          {children}
+        </Link>
+      );
+    }
+    return (
+      <Link to="/projets" onClick={() => setOpenMobile(false)}>
+        {children}
+      </Link>
+    );
   }
 
   return (
@@ -122,17 +122,25 @@ export function AppSidebar() {
           <SidebarGroupLabel>Pilotage</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                    <Link
-                      to={item.url}
-                      className="flex items-center gap-2"
-                      onClick={() => setOpenMobile(false)}
-                    >
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={currentPath === "/projets" || currentPath.startsWith("/projets/")}
+                  tooltip="Projets"
+                >
+                  <Link to="/projets" onClick={() => setOpenMobile(false)}>
+                    <FolderKanban className="h-4 w-4" />
+                    <span>Projets</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              {mainSections.map(({ title, section, icon: Icon }) => (
+                <SidebarMenuItem key={section}>
+                  <SidebarMenuButton asChild isActive={isProjectSection(section)} tooltip={title}>
+                    <ProjectSectionLink section={section}>
+                      <Icon className="h-4 w-4" />
+                      <span>{title}</span>
+                    </ProjectSectionLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -144,20 +152,28 @@ export function AppSidebar() {
           <SidebarGroupLabel>Ressources</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {secondaryItems.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                    <Link
-                      to={item.url}
-                      className="flex items-center gap-2"
-                      onClick={() => setOpenMobile(false)}
-                    >
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
+              {resourceSections.map(({ title, section, icon: Icon }) => (
+                <SidebarMenuItem key={section}>
+                  <SidebarMenuButton asChild isActive={isProjectSection(section)} tooltip={title}>
+                    <ProjectSectionLink section={section}>
+                      <Icon className="h-4 w-4" />
+                      <span>{title}</span>
+                    </ProjectSectionLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={currentPath === "/copilote"}
+                  tooltip="Copilote IA"
+                >
+                  <Link to="/copilote" onClick={() => setOpenMobile(false)}>
+                    <Sparkles className="h-4 w-4" />
+                    <span>Copilote IA</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

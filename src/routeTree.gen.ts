@@ -23,6 +23,14 @@ import { Route as AppBudgetRouteImport } from './routes/_app.budget'
 import { Route as AppArtisansRouteImport } from './routes/_app.artisans'
 import { Route as AppProjetsIndexRouteImport } from './routes/_app.projets.index'
 import { Route as AppProjetsIdRouteImport } from './routes/_app.projets.$id'
+import { Route as AppProjetsIdIndexRouteImport } from './routes/_app.projets.$id.index'
+import { Route as AppProjetsIdTachesRouteImport } from './routes/_app.projets.$id.taches'
+import { Route as AppProjetsIdLotsRouteImport } from './routes/_app.projets.$id.lots'
+import { Route as AppProjetsIdJournalRouteImport } from './routes/_app.projets.$id.journal'
+import { Route as AppProjetsIdDocumentsRouteImport } from './routes/_app.projets.$id.documents'
+import { Route as AppProjetsIdDashboardRouteImport } from './routes/_app.projets.$id.dashboard'
+import { Route as AppProjetsIdBudgetRouteImport } from './routes/_app.projets.$id.budget'
+import { Route as AppProjetsIdArtisansRouteImport } from './routes/_app.projets.$id.artisans'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -93,6 +101,46 @@ const AppProjetsIdRoute = AppProjetsIdRouteImport.update({
   path: '/projets/$id',
   getParentRoute: () => AppRoute,
 } as any)
+const AppProjetsIdIndexRoute = AppProjetsIdIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppProjetsIdRoute,
+} as any)
+const AppProjetsIdTachesRoute = AppProjetsIdTachesRouteImport.update({
+  id: '/taches',
+  path: '/taches',
+  getParentRoute: () => AppProjetsIdRoute,
+} as any)
+const AppProjetsIdLotsRoute = AppProjetsIdLotsRouteImport.update({
+  id: '/lots',
+  path: '/lots',
+  getParentRoute: () => AppProjetsIdRoute,
+} as any)
+const AppProjetsIdJournalRoute = AppProjetsIdJournalRouteImport.update({
+  id: '/journal',
+  path: '/journal',
+  getParentRoute: () => AppProjetsIdRoute,
+} as any)
+const AppProjetsIdDocumentsRoute = AppProjetsIdDocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
+  getParentRoute: () => AppProjetsIdRoute,
+} as any)
+const AppProjetsIdDashboardRoute = AppProjetsIdDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppProjetsIdRoute,
+} as any)
+const AppProjetsIdBudgetRoute = AppProjetsIdBudgetRouteImport.update({
+  id: '/budget',
+  path: '/budget',
+  getParentRoute: () => AppProjetsIdRoute,
+} as any)
+const AppProjetsIdArtisansRoute = AppProjetsIdArtisansRouteImport.update({
+  id: '/artisans',
+  path: '/artisans',
+  getParentRoute: () => AppProjetsIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -106,8 +154,16 @@ export interface FileRoutesByFullPath {
   '/lots': typeof AppLotsRoute
   '/notes': typeof AppNotesRoute
   '/taches': typeof AppTachesRoute
-  '/projets/$id': typeof AppProjetsIdRoute
+  '/projets/$id': typeof AppProjetsIdRouteWithChildren
   '/projets/': typeof AppProjetsIndexRoute
+  '/projets/$id/artisans': typeof AppProjetsIdArtisansRoute
+  '/projets/$id/budget': typeof AppProjetsIdBudgetRoute
+  '/projets/$id/dashboard': typeof AppProjetsIdDashboardRoute
+  '/projets/$id/documents': typeof AppProjetsIdDocumentsRoute
+  '/projets/$id/journal': typeof AppProjetsIdJournalRoute
+  '/projets/$id/lots': typeof AppProjetsIdLotsRoute
+  '/projets/$id/taches': typeof AppProjetsIdTachesRoute
+  '/projets/$id/': typeof AppProjetsIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -121,8 +177,15 @@ export interface FileRoutesByTo {
   '/lots': typeof AppLotsRoute
   '/notes': typeof AppNotesRoute
   '/taches': typeof AppTachesRoute
-  '/projets/$id': typeof AppProjetsIdRoute
   '/projets': typeof AppProjetsIndexRoute
+  '/projets/$id/artisans': typeof AppProjetsIdArtisansRoute
+  '/projets/$id/budget': typeof AppProjetsIdBudgetRoute
+  '/projets/$id/dashboard': typeof AppProjetsIdDashboardRoute
+  '/projets/$id/documents': typeof AppProjetsIdDocumentsRoute
+  '/projets/$id/journal': typeof AppProjetsIdJournalRoute
+  '/projets/$id/lots': typeof AppProjetsIdLotsRoute
+  '/projets/$id/taches': typeof AppProjetsIdTachesRoute
+  '/projets/$id': typeof AppProjetsIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -138,8 +201,16 @@ export interface FileRoutesById {
   '/_app/lots': typeof AppLotsRoute
   '/_app/notes': typeof AppNotesRoute
   '/_app/taches': typeof AppTachesRoute
-  '/_app/projets/$id': typeof AppProjetsIdRoute
+  '/_app/projets/$id': typeof AppProjetsIdRouteWithChildren
   '/_app/projets/': typeof AppProjetsIndexRoute
+  '/_app/projets/$id/artisans': typeof AppProjetsIdArtisansRoute
+  '/_app/projets/$id/budget': typeof AppProjetsIdBudgetRoute
+  '/_app/projets/$id/dashboard': typeof AppProjetsIdDashboardRoute
+  '/_app/projets/$id/documents': typeof AppProjetsIdDocumentsRoute
+  '/_app/projets/$id/journal': typeof AppProjetsIdJournalRoute
+  '/_app/projets/$id/lots': typeof AppProjetsIdLotsRoute
+  '/_app/projets/$id/taches': typeof AppProjetsIdTachesRoute
+  '/_app/projets/$id/': typeof AppProjetsIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -157,6 +228,14 @@ export interface FileRouteTypes {
     | '/taches'
     | '/projets/$id'
     | '/projets/'
+    | '/projets/$id/artisans'
+    | '/projets/$id/budget'
+    | '/projets/$id/dashboard'
+    | '/projets/$id/documents'
+    | '/projets/$id/journal'
+    | '/projets/$id/lots'
+    | '/projets/$id/taches'
+    | '/projets/$id/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -170,8 +249,15 @@ export interface FileRouteTypes {
     | '/lots'
     | '/notes'
     | '/taches'
-    | '/projets/$id'
     | '/projets'
+    | '/projets/$id/artisans'
+    | '/projets/$id/budget'
+    | '/projets/$id/dashboard'
+    | '/projets/$id/documents'
+    | '/projets/$id/journal'
+    | '/projets/$id/lots'
+    | '/projets/$id/taches'
+    | '/projets/$id'
   id:
     | '__root__'
     | '/'
@@ -188,6 +274,14 @@ export interface FileRouteTypes {
     | '/_app/taches'
     | '/_app/projets/$id'
     | '/_app/projets/'
+    | '/_app/projets/$id/artisans'
+    | '/_app/projets/$id/budget'
+    | '/_app/projets/$id/dashboard'
+    | '/_app/projets/$id/documents'
+    | '/_app/projets/$id/journal'
+    | '/_app/projets/$id/lots'
+    | '/_app/projets/$id/taches'
+    | '/_app/projets/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -297,8 +391,90 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProjetsIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/projets/$id/': {
+      id: '/_app/projets/$id/'
+      path: '/'
+      fullPath: '/projets/$id/'
+      preLoaderRoute: typeof AppProjetsIdIndexRouteImport
+      parentRoute: typeof AppProjetsIdRoute
+    }
+    '/_app/projets/$id/taches': {
+      id: '/_app/projets/$id/taches'
+      path: '/taches'
+      fullPath: '/projets/$id/taches'
+      preLoaderRoute: typeof AppProjetsIdTachesRouteImport
+      parentRoute: typeof AppProjetsIdRoute
+    }
+    '/_app/projets/$id/lots': {
+      id: '/_app/projets/$id/lots'
+      path: '/lots'
+      fullPath: '/projets/$id/lots'
+      preLoaderRoute: typeof AppProjetsIdLotsRouteImport
+      parentRoute: typeof AppProjetsIdRoute
+    }
+    '/_app/projets/$id/journal': {
+      id: '/_app/projets/$id/journal'
+      path: '/journal'
+      fullPath: '/projets/$id/journal'
+      preLoaderRoute: typeof AppProjetsIdJournalRouteImport
+      parentRoute: typeof AppProjetsIdRoute
+    }
+    '/_app/projets/$id/documents': {
+      id: '/_app/projets/$id/documents'
+      path: '/documents'
+      fullPath: '/projets/$id/documents'
+      preLoaderRoute: typeof AppProjetsIdDocumentsRouteImport
+      parentRoute: typeof AppProjetsIdRoute
+    }
+    '/_app/projets/$id/dashboard': {
+      id: '/_app/projets/$id/dashboard'
+      path: '/dashboard'
+      fullPath: '/projets/$id/dashboard'
+      preLoaderRoute: typeof AppProjetsIdDashboardRouteImport
+      parentRoute: typeof AppProjetsIdRoute
+    }
+    '/_app/projets/$id/budget': {
+      id: '/_app/projets/$id/budget'
+      path: '/budget'
+      fullPath: '/projets/$id/budget'
+      preLoaderRoute: typeof AppProjetsIdBudgetRouteImport
+      parentRoute: typeof AppProjetsIdRoute
+    }
+    '/_app/projets/$id/artisans': {
+      id: '/_app/projets/$id/artisans'
+      path: '/artisans'
+      fullPath: '/projets/$id/artisans'
+      preLoaderRoute: typeof AppProjetsIdArtisansRouteImport
+      parentRoute: typeof AppProjetsIdRoute
+    }
   }
 }
+
+interface AppProjetsIdRouteChildren {
+  AppProjetsIdArtisansRoute: typeof AppProjetsIdArtisansRoute
+  AppProjetsIdBudgetRoute: typeof AppProjetsIdBudgetRoute
+  AppProjetsIdDashboardRoute: typeof AppProjetsIdDashboardRoute
+  AppProjetsIdDocumentsRoute: typeof AppProjetsIdDocumentsRoute
+  AppProjetsIdJournalRoute: typeof AppProjetsIdJournalRoute
+  AppProjetsIdLotsRoute: typeof AppProjetsIdLotsRoute
+  AppProjetsIdTachesRoute: typeof AppProjetsIdTachesRoute
+  AppProjetsIdIndexRoute: typeof AppProjetsIdIndexRoute
+}
+
+const AppProjetsIdRouteChildren: AppProjetsIdRouteChildren = {
+  AppProjetsIdArtisansRoute: AppProjetsIdArtisansRoute,
+  AppProjetsIdBudgetRoute: AppProjetsIdBudgetRoute,
+  AppProjetsIdDashboardRoute: AppProjetsIdDashboardRoute,
+  AppProjetsIdDocumentsRoute: AppProjetsIdDocumentsRoute,
+  AppProjetsIdJournalRoute: AppProjetsIdJournalRoute,
+  AppProjetsIdLotsRoute: AppProjetsIdLotsRoute,
+  AppProjetsIdTachesRoute: AppProjetsIdTachesRoute,
+  AppProjetsIdIndexRoute: AppProjetsIdIndexRoute,
+}
+
+const AppProjetsIdRouteWithChildren = AppProjetsIdRoute._addFileChildren(
+  AppProjetsIdRouteChildren,
+)
 
 interface AppRouteChildren {
   AppArtisansRoute: typeof AppArtisansRoute
@@ -309,7 +485,7 @@ interface AppRouteChildren {
   AppLotsRoute: typeof AppLotsRoute
   AppNotesRoute: typeof AppNotesRoute
   AppTachesRoute: typeof AppTachesRoute
-  AppProjetsIdRoute: typeof AppProjetsIdRoute
+  AppProjetsIdRoute: typeof AppProjetsIdRouteWithChildren
   AppProjetsIndexRoute: typeof AppProjetsIndexRoute
 }
 
@@ -322,7 +498,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppLotsRoute: AppLotsRoute,
   AppNotesRoute: AppNotesRoute,
   AppTachesRoute: AppTachesRoute,
-  AppProjetsIdRoute: AppProjetsIdRoute,
+  AppProjetsIdRoute: AppProjetsIdRouteWithChildren,
   AppProjetsIndexRoute: AppProjetsIndexRoute,
 }
 
