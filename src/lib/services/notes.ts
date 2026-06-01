@@ -6,12 +6,20 @@ import type { Tables } from "@/lib/supabase/types";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-function assertUuid(id: string, label: string): void {
-  if (!UUID_RE.test(id)) {
-    throw new Error(
-      `Projet Supabase introuvable. Rechargez la page ou reconnectez-vous. (${label}: "${id}")`,
-    );
-  }
+function isUuid(id: string): boolean {
+  return UUID_RE.test(id);
+}
+
+async function resolveProjectId(hint: string, userId: string): Promise<string> {
+  if (isUuid(hint)) return hint;
+  const { data, error } = await supabase
+    .from("projects")
+    .select("id")
+    .eq("owner_id", userId)
+    .limit(1)
+    .single();
+  if (error || !data) throw new Error("Aucun projet Supabase trouvé pour cet utilisateur.");
+  return data.id;
 }
 
 function toNote(row: Tables<"notes">): Note {
@@ -40,10 +48,10 @@ export async function createNote(input: {
   note_type: Note["type"];
   project_id: string;
 }): Promise<Note> {
-  assertUuid(input.project_id, "project_id");
-
   const user = await getCurrentUser();
   if (!user) throw new Error("Non authentifié");
+
+  const project_id = await resolveProjectId(input.project_id, user.id);
 
   const { data, error } = await supabase
     .from("notes")
@@ -51,7 +59,7 @@ export async function createNote(input: {
       title: input.title,
       body: input.body,
       note_type: input.note_type,
-      project_id: input.project_id,
+      project_id,
       owner_id: user.id,
       note_date: new Date().toISOString().split("T")[0],
       author_name: "Moi",
