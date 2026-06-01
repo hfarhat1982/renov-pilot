@@ -18,7 +18,7 @@ DECLARE
   -- ──────────────────────────────────────────────────────
   -- !! REMPLACER NULL PAR VOTRE UUID (Authentication > Users) !!
   -- ──────────────────────────────────────────────────────
-  v_owner_id uuid := 'e2f6fab9-44b7-4d22-a85f-ef5312dece18';
+  v_owner_id uuid := '91281678-eb7e-445e-b74d-f67509164eff';
 
   v_project_id uuid;
 

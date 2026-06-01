@@ -124,12 +124,8 @@ function DecisionsPage() {
       {/* Onglets principaux */}
       <Tabs value={mainTab} onValueChange={(v) => setMainTab(v as typeof mainTab)}>
         <TabsList className="w-full justify-start bg-secondary/60">
-          <TabsTrigger value="decisions">
-            Décisions ({decisions.length})
-          </TabsTrigger>
-          <TabsTrigger value="notes">
-            Notes & alertes ({notes.length})
-          </TabsTrigger>
+          <TabsTrigger value="decisions">Décisions ({decisions.length})</TabsTrigger>
+          <TabsTrigger value="notes">Notes & alertes ({notes.length})</TabsTrigger>
         </TabsList>
       </Tabs>
 
