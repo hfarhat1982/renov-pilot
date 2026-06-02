@@ -16,7 +16,7 @@ import {
 } from "@/lib/mockData";
 import { getProjectById } from "@/lib/services/projects";
 import { getDecisionsByProject } from "@/lib/services/decisions";
-import { getNotes } from "@/lib/services/notes";
+import { getNotesByProject } from "@/lib/services/notes";
 import { getLotsByProject } from "@/lib/services/lots";
 import { FormAddDecision } from "@/components/forms/FormAddDecision";
 import { FormAddPhoto } from "@/components/forms/FormAddPhoto";
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/_app/projets/$id/journal")({
     if (!project) throw notFound();
     const [decisions, notes, lots] = await Promise.all([
       getDecisionsByProject(project.id),
-      getNotes(),
+      getNotesByProject(project.id),
       getLotsByProject(project.id),
     ]);
     return { project, decisions, notes, lots };

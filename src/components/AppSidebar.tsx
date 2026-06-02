@@ -74,13 +74,17 @@ export function AppSidebar() {
   function ProjectSectionLink({ section, children }: { section: Section; children: React.ReactNode }) {
     if (activeId) {
       return (
-        <Link to={`/projets/${activeId}/${section}` as any} onClick={() => setOpenMobile(false)}>
+        <Link
+          to={`/projets/${activeId}/${section}` as any}
+          className="flex items-center gap-2"
+          onClick={() => setOpenMobile(false)}
+        >
           {children}
         </Link>
       );
     }
     return (
-      <Link to="/projets" onClick={() => setOpenMobile(false)}>
+      <Link to="/projets" className="flex items-center gap-2" onClick={() => setOpenMobile(false)}>
         {children}
       </Link>
     );
