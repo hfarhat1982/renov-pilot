@@ -1,5 +1,5 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,39 +12,48 @@ import { getDocumentsByProjectOnly } from "@/lib/services/documents";
 
 export const Route = createFileRoute("/_app/projets/$id/documents")({
   head: () => ({ meta: [{ title: "Documents — RenoV Pilot" }] }),
-  loader: async ({ params }) => {
-    const project = await getProjectById(params.id);
-    if (!project) throw notFound();
-    const documents = await getDocumentsByProjectOnly(project.id);
-    return { documents };
-  },
   component: DocumentsPage,
-  notFoundComponent: () => (
-    <div className="py-12 text-center text-muted-foreground">Projet introuvable.</div>
-  ),
 });
+
+const Spinner = () => (
+  <div className="flex min-h-[40vh] items-center justify-center">
+    <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+  </div>
+);
 
 type Cat = DocumentItem["category"] | "all";
 
 function DocumentsPage() {
-  const { documents } = Route.useLoaderData();
+  const { id } = Route.useParams();
+  const [documents, setDocuments] = useState<DocumentItem[] | null | "not-found">(null);
   const [cat, setCat] = useState<Cat>("all");
+
+  useEffect(() => {
+    let cancelled = false;
+    getProjectById(id).then(async (project) => {
+      if (cancelled) return;
+      if (!project) { setDocuments("not-found"); return; }
+      const docs = await getDocumentsByProjectOnly(project.id);
+      if (!cancelled) setDocuments(docs);
+    });
+    return () => { cancelled = true; };
+  }, [id]);
+
+  if (documents === "not-found") return <div className="py-12 text-center text-muted-foreground">Projet introuvable.</div>;
+  if (documents === null) return <Spinner />;
+
+  const cats: Cat[] = ["all", ...(Object.keys(documentCategoryLabel) as DocumentItem["category"][])];
   const filtered = useMemo(
     () => documents.filter((d) => cat === "all" || d.category === cat),
     [documents, cat],
   );
-  const cats: Cat[] = ["all", ...(Object.keys(documentCategoryLabel) as DocumentItem["category"][])];
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Documents & photos"
         description="Plans, devis, factures, photos chantier et garanties — au même endroit."
-        actions={
-          <Button size="sm" disabled>
-            <Upload className="mr-1 h-4 w-4" />Importer
-          </Button>
-        }
+        actions={<Button size="sm" disabled><Upload className="mr-1 h-4 w-4" />Importer</Button>}
       />
 
       <Tabs value={cat} onValueChange={(v) => setCat(v as Cat)}>

@@ -1,5 +1,5 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,24 +21,19 @@ import { getLotsByProject } from "@/lib/services/lots";
 import { FormAddDecision } from "@/components/forms/FormAddDecision";
 import { FormAddPhoto } from "@/components/forms/FormAddPhoto";
 import { FormAddNote } from "@/components/forms/FormAddNote";
+import type { Project, Lot, Decision } from "@/lib/types";
+import type { Note as NoteType } from "@/lib/types";
 
 export const Route = createFileRoute("/_app/projets/$id/journal")({
   head: () => ({ meta: [{ title: "Journal chantier — RenoV Pilot" }] }),
-  loader: async ({ params }) => {
-    const project = await getProjectById(params.id);
-    if (!project) throw notFound();
-    const [decisions, notes, lots] = await Promise.all([
-      getDecisionsByProject(project.id),
-      getNotesByProject(project.id),
-      getLotsByProject(project.id),
-    ]);
-    return { project, decisions, notes, lots };
-  },
   component: JournalPage,
-  notFoundComponent: () => (
-    <div className="py-12 text-center text-muted-foreground">Projet introuvable.</div>
-  ),
 });
+
+const Spinner = () => (
+  <div className="flex min-h-[40vh] items-center justify-center">
+    <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+  </div>
+);
 
 const statusTone: Record<DecisionStatus, "warning" | "success" | "muted"> = {
   a_trancher: "warning", validee: "success", abandonnee: "muted",
@@ -55,13 +50,36 @@ const noteMeta: Record<
   alerte: { label: "Alerte", tone: "danger", icon: AlertTriangle },
 };
 
+type Data = { project: Project; decisions: Decision[]; notes: NoteType[]; lots: Lot[] };
+
 function JournalPage() {
-  const { project, decisions, notes, lots } = Route.useLoaderData();
+  const { id } = Route.useParams();
+  const [data, setData] = useState<Data | null | "not-found">(null);
   const [mainTab, setMainTab] = useState<"decisions" | "notes">("decisions");
   const [decisionFilter, setDecisionFilter] = useState<"all" | DecisionStatus>("all");
   const [decisionOpen, setDecisionOpen] = useState(false);
   const [photoOpen, setPhotoOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    getProjectById(id).then(async (project) => {
+      if (cancelled) return;
+      if (!project) { setData("not-found"); return; }
+      const [decisions, notes, lots] = await Promise.all([
+        getDecisionsByProject(project.id),
+        getNotesByProject(project.id),
+        getLotsByProject(project.id),
+      ]);
+      if (!cancelled) setData({ project, decisions, notes, lots });
+    });
+    return () => { cancelled = true; };
+  }, [id]);
+
+  if (data === "not-found") return <div className="py-12 text-center text-muted-foreground">Projet introuvable.</div>;
+  if (!data) return <Spinner />;
+
+  const { project, decisions, notes, lots } = data;
 
   const filtered = useMemo(
     () => decisions
@@ -74,10 +92,7 @@ function JournalPage() {
     validee: decisions.filter((d) => d.status === "validee").length,
     abandonnee: decisions.filter((d) => d.status === "abandonnee").length,
   }), [decisions]);
-  const sortedNotes = useMemo(
-    () => [...notes].sort((a, b) => b.date.localeCompare(a.date)),
-    [notes],
-  );
+  const sortedNotes = useMemo(() => [...notes].sort((a, b) => b.date.localeCompare(a.date)), [notes]);
 
   return (
     <div className="space-y-6">
@@ -86,15 +101,9 @@ function JournalPage() {
         description="Décisions, notes terrain et alertes de votre chantier."
         actions={
           <>
-            <Button size="sm" variant="outline" onClick={() => setDecisionOpen(true)}>
-              <Plus className="mr-1 h-4 w-4" />Décision
-            </Button>
-            <Button size="sm" variant="outline" onClick={() => setNoteOpen(true)}>
-              <Plus className="mr-1 h-4 w-4" />Note
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => setPhotoOpen(true)}>
-              <Camera className="mr-1 h-4 w-4" />Photo
-            </Button>
+            <Button size="sm" variant="outline" onClick={() => setDecisionOpen(true)}><Plus className="mr-1 h-4 w-4" />Décision</Button>
+            <Button size="sm" variant="outline" onClick={() => setNoteOpen(true)}><Plus className="mr-1 h-4 w-4" />Note</Button>
+            <Button size="sm" variant="ghost" onClick={() => setPhotoOpen(true)}><Camera className="mr-1 h-4 w-4" />Photo</Button>
           </>
         }
       />
@@ -116,18 +125,14 @@ function JournalPage() {
               <TabsTrigger value="abandonnee" className="text-xs">Abandonnées ({counts.abandonnee})</TabsTrigger>
             </TabsList>
           </Tabs>
-          {filtered.length === 0 && (
-            <p className="py-12 text-center text-sm text-muted-foreground">Aucune décision pour ce filtre.</p>
-          )}
+          {filtered.length === 0 && <p className="py-12 text-center text-sm text-muted-foreground">Aucune décision pour ce filtre.</p>}
           {filtered.map((d) => (
             <Card key={d.id} className={cn("border-border/60 shadow-sm", d.status === "a_trancher" && "border-warning/50")}>
               <CardContent className="space-y-3 p-4 sm:space-y-4 sm:p-5">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0 space-y-0.5">
                     <p className="font-semibold leading-snug">{d.title}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {d.decisionDate ? formatDate(d.decisionDate) : "Pas encore tranchée"}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{d.decisionDate ? formatDate(d.decisionDate) : "Pas encore tranchée"}</p>
                   </div>
                   <div className="flex shrink-0 flex-wrap gap-2">
                     <PriorityBadge priority={d.priority} />
@@ -149,16 +154,10 @@ function JournalPage() {
                 {(d.budgetImpact !== null || (d.planningImpactDays !== null && d.planningImpactDays !== 0) || d.linkedDocuments.length > 0) && (
                   <div className="flex flex-wrap items-center gap-4 border-t border-border/60 pt-3 text-xs text-muted-foreground">
                     {d.budgetImpact !== null && (
-                      <span className="flex items-center gap-1.5">
-                        <Wallet className="h-3.5 w-3.5 shrink-0" />
-                        Impact budget : <span className={cn("font-medium", d.budgetImpact > 0 ? "text-destructive" : d.budgetImpact < 0 ? "text-success" : "")}>{d.budgetImpact > 0 ? "+" : ""}{formatEUR(d.budgetImpact)}</span>
-                      </span>
+                      <span className="flex items-center gap-1.5"><Wallet className="h-3.5 w-3.5 shrink-0" />Impact budget : <span className={cn("font-medium", d.budgetImpact > 0 ? "text-destructive" : d.budgetImpact < 0 ? "text-success" : "")}>{d.budgetImpact > 0 ? "+" : ""}{formatEUR(d.budgetImpact)}</span></span>
                     )}
                     {d.planningImpactDays !== null && d.planningImpactDays !== 0 && (
-                      <span className="flex items-center gap-1.5">
-                        <CalendarDays className="h-3.5 w-3.5 shrink-0" />
-                        Planning : <span className={cn("font-medium", d.planningImpactDays > 0 ? "text-warning-foreground" : "text-success")}>{d.planningImpactDays > 0 ? "+" : ""}{d.planningImpactDays} j</span>
-                      </span>
+                      <span className="flex items-center gap-1.5"><CalendarDays className="h-3.5 w-3.5 shrink-0" />Planning : <span className={cn("font-medium", d.planningImpactDays > 0 ? "text-warning-foreground" : "text-success")}>{d.planningImpactDays > 0 ? "+" : ""}{d.planningImpactDays} j</span></span>
                     )}
                     {d.linkedDocuments.length > 0 && (
                       <span className="flex items-center gap-1.5"><Paperclip className="h-3.5 w-3.5 shrink-0" />{d.linkedDocuments.join(" · ")}</span>

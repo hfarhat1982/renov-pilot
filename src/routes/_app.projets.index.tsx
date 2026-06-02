@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight, FolderKanban, Plus } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -12,21 +12,28 @@ import { formatEUR, projectStatusLabel } from "@/lib/mockData";
 import { getSupabaseProjectsOnly } from "@/lib/services/projects";
 import { storeProjectId } from "@/lib/activeProject";
 import { FormCreateProject } from "@/components/forms/FormCreateProject";
+import type { Project } from "@/lib/types";
 
 export const Route = createFileRoute("/_app/projets/")({
   head: () => ({ meta: [{ title: "Projets — RenoV Pilot" }] }),
-  loader: async () => {
-    const projects = await getSupabaseProjectsOnly();
-    return { projects };
-  },
   component: ProjectsList,
 });
 
+const Spinner = () => (
+  <div className="flex min-h-[40vh] items-center justify-center">
+    <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+  </div>
+);
+
 function ProjectsList() {
-  const { projects } = Route.useLoaderData();
   const router = useRouter();
   const navigate = useNavigate();
+  const [projects, setProjects] = useState<Project[] | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+
+  useEffect(() => {
+    getSupabaseProjectsOnly().then(setProjects);
+  }, []);
 
   function handleProjectCreated(projectId: string) {
     storeProjectId(projectId);
@@ -53,22 +60,19 @@ function ProjectsList() {
     </Dialog>
   );
 
+  if (projects === null) return <Spinner />;
+
   if (projects.length === 0) {
     return (
       <div className="space-y-6">
-        <PageHeader
-          title="Projets"
-          description="Tous vos projets de rénovation en cours et à venir."
-        />
+        <PageHeader title="Projets" description="Tous vos projets de rénovation en cours et à venir." />
         <div className="flex flex-col items-center gap-4 py-16 text-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-secondary text-muted-foreground">
             <FolderKanban className="h-6 w-6" />
           </div>
           <div>
             <p className="font-medium">Aucun projet pour le moment</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Créez votre premier projet pour commencer le suivi.
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">Créez votre premier projet pour commencer le suivi.</p>
           </div>
           {createButton}
         </div>
@@ -93,8 +97,7 @@ function ProjectsList() {
                 <div>
                   <CardTitle className="text-base">{p.name}</CardTitle>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {p.type}
-                    {p.surface ? ` · ${p.surface} m²` : ""}
+                    {p.type}{p.surface ? ` · ${p.surface} m²` : ""}
                   </p>
                 </div>
                 <StatusPill tone="info">{projectStatusLabel[p.status]}</StatusPill>

@@ -1,4 +1,5 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArtisanStatusBadge } from "@/components/StatusBadges";
@@ -7,20 +8,18 @@ import { formatEUR } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
 import { getProjectById } from "@/lib/services/projects";
 import { getArtisansByProject } from "@/lib/services/artisans";
+import type { Artisan } from "@/lib/types";
 
 export const Route = createFileRoute("/_app/projets/$id/artisans")({
   head: () => ({ meta: [{ title: "Artisans — RenoV Pilot" }] }),
-  loader: async ({ params }) => {
-    const project = await getProjectById(params.id);
-    if (!project) throw notFound();
-    const artisans = await getArtisansByProject(project.id);
-    return { artisans };
-  },
   component: ArtisansPage,
-  notFoundComponent: () => (
-    <div className="py-12 text-center text-muted-foreground">Projet introuvable.</div>
-  ),
 });
+
+const Spinner = () => (
+  <div className="flex min-h-[40vh] items-center justify-center">
+    <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+  </div>
+);
 
 function Rating({ value }: { value: number }) {
   return (
@@ -33,7 +32,22 @@ function Rating({ value }: { value: number }) {
 }
 
 function ArtisansPage() {
-  const { artisans } = Route.useLoaderData();
+  const { id } = Route.useParams();
+  const [artisans, setArtisans] = useState<Artisan[] | null | "not-found">(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getProjectById(id).then(async (project) => {
+      if (cancelled) return;
+      if (!project) { setArtisans("not-found"); return; }
+      const list = await getArtisansByProject(project.id);
+      if (!cancelled) setArtisans(list);
+    });
+    return () => { cancelled = true; };
+  }, [id]);
+
+  if (artisans === "not-found") return <div className="py-12 text-center text-muted-foreground">Projet introuvable.</div>;
+  if (artisans === null) return <Spinner />;
 
   return (
     <div className="space-y-6">

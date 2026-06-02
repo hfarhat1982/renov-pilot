@@ -1,5 +1,5 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
   Wallet, TrendingDown, TrendingUp, Gauge,
   AlertTriangle, CircleAlert, Info, ArrowRight, Plus,
@@ -17,26 +17,18 @@ import { getTasksByProject } from "@/lib/services/tasks";
 import { getAlerts } from "@/lib/services/alerts";
 import { getDecisionsByProject } from "@/lib/services/decisions";
 import { FormAddNote } from "@/components/forms/FormAddNote";
+import type { Project, Lot, Task, Alert, Decision } from "@/lib/types";
 
 export const Route = createFileRoute("/_app/projets/$id/dashboard")({
   head: () => ({ meta: [{ title: "Tableau de bord — RenoV Pilot" }] }),
-  loader: async ({ params }) => {
-    const project = await getProjectById(params.id);
-    if (!project) throw notFound();
-    const [stats, lots, tasks, alerts, decisions] = await Promise.all([
-      getProjectStats(project.id),
-      getLotsByProject(project.id),
-      getTasksByProject(project.id),
-      getAlerts(),
-      getDecisionsByProject(project.id),
-    ]);
-    return { project, stats, lots, tasks, alerts, decisions };
-  },
   component: Dashboard,
-  notFoundComponent: () => (
-    <div className="py-12 text-center text-muted-foreground">Projet introuvable.</div>
-  ),
 });
+
+const Spinner = () => (
+  <div className="flex min-h-[40vh] items-center justify-center">
+    <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+  </div>
+);
 
 const alertIcon = { critical: CircleAlert, warning: AlertTriangle, info: Info } as const;
 const alertTone = {
@@ -45,17 +37,41 @@ const alertTone = {
   info: "text-info bg-info/10",
 } as const;
 
+type Stats = Awaited<ReturnType<typeof getProjectStats>>;
+type Data = { project: Project; stats: Stats; lots: Lot[]; tasks: Task[]; alerts: Alert[]; decisions: Decision[] };
+
 function Dashboard() {
-  const { project, stats, lots, tasks, alerts, decisions } = Route.useLoaderData();
+  const { id } = Route.useParams();
+  const [data, setData] = useState<Data | null | "not-found">(null);
   const [noteOpen, setNoteOpen] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    getProjectById(id).then(async (project) => {
+      if (cancelled) return;
+      if (!project) { setData("not-found"); return; }
+      const [stats, lots, tasks, alerts, decisions] = await Promise.all([
+        getProjectStats(project.id),
+        getLotsByProject(project.id),
+        getTasksByProject(project.id),
+        getAlerts(),
+        getDecisionsByProject(project.id),
+      ]);
+      if (!cancelled) setData({ project, stats, lots, tasks, alerts, decisions });
+    });
+    return () => { cancelled = true; };
+  }, [id]);
+
+  if (data === "not-found") return <div className="py-12 text-center text-muted-foreground">Projet introuvable.</div>;
+  if (!data) return <Spinner />;
+
+  const { project, stats, lots, tasks, alerts, decisions } = data;
   const priorityOrder = { critique: 0, haute: 1, moyenne: 2, basse: 3 } as const;
   const urgentDecisions = decisions
     .filter((d) => d.status === "a_trancher")
     .sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority])
     .slice(0, 3);
-  const criticalLots = lots
-    .filter((l) => l.priority === "critique" && l.status !== "termine")
-    .slice(0, 5);
+  const criticalLots = lots.filter((l) => l.priority === "critique" && l.status !== "termine").slice(0, 5);
   const upcomingTasks = [...tasks]
     .filter((t) => t.status !== "termine")
     .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
@@ -70,13 +86,11 @@ function Dashboard() {
           <>
             <Button asChild variant="outline" size="sm">
               <Link to="/projets/$id" params={{ id: project.id }}>
-                Voir le projet
-                <ArrowRight className="ml-1 h-4 w-4" />
+                Voir le projet<ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </Button>
             <Button variant="ghost" size="sm" onClick={() => setNoteOpen(true)}>
-              <Plus className="mr-1 h-4 w-4" />
-              Ajouter note
+              <Plus className="mr-1 h-4 w-4" />Ajouter note
             </Button>
           </>
         }
@@ -129,9 +143,7 @@ function Dashboard() {
                   <p className="truncate text-sm font-medium">{lot.name}</p>
                   <p className="text-xs text-muted-foreground">Budget prévu : {formatEUR(lot.budgetPlanned)}</p>
                 </div>
-                <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
-                  <LotStatusBadge status={lot.status} />
-                </div>
+                <LotStatusBadge status={lot.status} />
               </div>
             ))}
           </CardContent>

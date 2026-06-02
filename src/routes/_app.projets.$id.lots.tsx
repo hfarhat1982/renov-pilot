@@ -1,5 +1,5 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,32 +16,47 @@ import { getLotsByProject } from "@/lib/services/lots";
 import { getArtisans } from "@/lib/services/artisans";
 import { FormAddDevis } from "@/components/forms/FormAddDevis";
 import { FormLotStatus } from "@/components/forms/FormLotStatus";
+import type { Lot, Artisan } from "@/lib/types";
 
 export const Route = createFileRoute("/_app/projets/$id/lots")({
   head: () => ({ meta: [{ title: "Lots travaux — RenoV Pilot" }] }),
-  loader: async ({ params }) => {
-    const project = await getProjectById(params.id);
-    if (!project) throw notFound();
-    const [lots, artisans] = await Promise.all([getLotsByProject(project.id), getArtisans()]);
-    return { lots, artisans };
-  },
   component: LotsPage,
-  notFoundComponent: () => (
-    <div className="py-12 text-center text-muted-foreground">Projet introuvable.</div>
-  ),
 });
 
+const Spinner = () => (
+  <div className="flex min-h-[40vh] items-center justify-center">
+    <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+  </div>
+);
+
+type Data = { lots: Lot[]; artisans: Artisan[] };
+
 function LotsPage() {
-  const { lots, artisans } = Route.useLoaderData();
+  const { id } = Route.useParams();
+  const [data, setData] = useState<Data | null | "not-found">(null);
   const [q, setQ] = useState("");
   const [devisOpen, setDevisOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
   const [activeLotId, setActiveLotId] = useState<string | undefined>();
 
+  useEffect(() => {
+    let cancelled = false;
+    getProjectById(id).then(async (project) => {
+      if (cancelled) return;
+      if (!project) { setData("not-found"); return; }
+      const [lots, artisans] = await Promise.all([getLotsByProject(project.id), getArtisans()]);
+      if (!cancelled) setData({ lots, artisans });
+    });
+    return () => { cancelled = true; };
+  }, [id]);
+
+  if (data === "not-found") return <div className="py-12 text-center text-muted-foreground">Projet introuvable.</div>;
+  if (!data) return <Spinner />;
+
+  const { lots, artisans } = data;
   const filtered = lots.filter((l) => l.name.toLowerCase().includes(q.toLowerCase()));
-  const artisanName = (id: string | null) =>
-    id ? (artisans.find((a) => a.id === id)?.name ?? "—") : "—";
-  const openStatus = (id: string) => { setActiveLotId(id); setStatusOpen(true); };
+  const artisanName = (aid: string | null) => aid ? (artisans.find((a) => a.id === aid)?.name ?? "—") : "—";
+  const openStatus = (lotId: string) => { setActiveLotId(lotId); setStatusOpen(true); };
 
   return (
     <div className="space-y-6">
@@ -55,12 +70,7 @@ function LotsPage() {
         }
       />
 
-      <Input
-        placeholder="Rechercher un lot…"
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        className="max-w-xs"
-      />
+      <Input placeholder="Rechercher un lot…" value={q} onChange={(e) => setQ(e.target.value)} className="max-w-xs" />
 
       {filtered.length === 0 ? (
         <p className="py-12 text-center text-sm text-muted-foreground">
@@ -68,7 +78,6 @@ function LotsPage() {
         </p>
       ) : (
         <>
-          {/* Desktop */}
           <Card className="hidden border-border/60 shadow-sm md:block">
             <CardContent className="p-0">
               <div className="overflow-x-auto">
@@ -106,7 +115,6 @@ function LotsPage() {
             </CardContent>
           </Card>
 
-          {/* Mobile */}
           <div className="space-y-3 md:hidden">
             {filtered.map((l) => (
               <Card key={l.id} className="border-border/60 shadow-sm">

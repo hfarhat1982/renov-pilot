@@ -1,5 +1,5 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/PageHeader";
 import { StatCard } from "@/components/StatCard";
@@ -21,24 +21,18 @@ import { getProjectById, getProjectStats } from "@/lib/services/projects";
 import { getLotsByProject } from "@/lib/services/lots";
 import { FormAddDevis } from "@/components/forms/FormAddDevis";
 import { FormLotScenario } from "@/components/forms/FormLotScenario";
+import type { Project, Lot } from "@/lib/types";
 
 export const Route = createFileRoute("/_app/projets/$id/budget")({
   head: () => ({ meta: [{ title: "Budget — RenoV Pilot" }] }),
-  loader: async ({ params }) => {
-    const project = await getProjectById(params.id);
-    if (!project) throw notFound();
-    const [lots, stats] = await Promise.all([
-      getLotsByProject(project.id),
-      getProjectStats(project.id),
-    ]);
-    const scenarioStats = getBudgetScenarioStats(lots, RESERVE, project.budgetTarget);
-    return { project, lots, stats, scenarioStats };
-  },
   component: BudgetPage,
-  notFoundComponent: () => (
-    <div className="py-12 text-center text-muted-foreground">Projet introuvable.</div>
-  ),
 });
+
+const Spinner = () => (
+  <div className="flex min-h-[40vh] items-center justify-center">
+    <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+  </div>
+);
 
 const riskTone: Record<BudgetRiskLevel, "success" | "info" | "warning" | "danger"> = {
   faible: "success", moyen: "info", eleve: "warning", critique: "danger",
@@ -48,21 +42,40 @@ function fmtScenario(v: number | null): string {
   return v === null ? "À chiffrer" : formatEUR(v);
 }
 
+type Stats = Awaited<ReturnType<typeof getProjectStats>>;
+type Data = { project: Project; lots: Lot[]; stats: Stats };
+
 function BudgetPage() {
-  const { project, lots: projectLots, stats, scenarioStats } = Route.useLoaderData();
+  const { id } = Route.useParams();
+  const [data, setData] = useState<Data | null | "not-found">(null);
+  const [devisOpen, setDevisOpen] = useState(false);
+  const [scenarioOpen, setScenarioOpen] = useState(false);
+  const [activeLotId, setActiveLotId] = useState<string | undefined>();
+
+  useEffect(() => {
+    let cancelled = false;
+    getProjectById(id).then(async (project) => {
+      if (cancelled) return;
+      if (!project) { setData("not-found"); return; }
+      const [lots, stats] = await Promise.all([getLotsByProject(project.id), getProjectStats(project.id)]);
+      if (!cancelled) setData({ project, lots, stats });
+    });
+    return () => { cancelled = true; };
+  }, [id]);
+
+  if (data === "not-found") return <div className="py-12 text-center text-muted-foreground">Projet introuvable.</div>;
+  if (!data) return <Spinner />;
+
+  const { project, lots: projectLots, stats } = data;
+  const scenarioStats = getBudgetScenarioStats(projectLots, RESERVE, project.budgetTarget);
   const {
     optimisticTotal, retainedTotal, pessimisticTotal,
     retainedWithReserve, pessimisticWithReserve,
     targetGapRetained, targetGapPessimistic,
   } = scenarioStats;
-
-  const [devisOpen, setDevisOpen] = useState(false);
-  const [scenarioOpen, setScenarioOpen] = useState(false);
-  const [activeLotId, setActiveLotId] = useState<string | undefined>();
-
   const totalQuoteMin = projectLots.reduce((s, l) => s + (l.quoteReceived ?? 0), 0);
   const totalReal = projectLots.reduce((s, l) => s + (l.realCost ?? 0), 0);
-  const openScenario = (id: string) => { setActiveLotId(id); setScenarioOpen(true); };
+  const openScenario = (lotId: string) => { setActiveLotId(lotId); setScenarioOpen(true); };
 
   return (
     <div className="space-y-6">
@@ -79,16 +92,16 @@ function BudgetPage() {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard label="Budget cible" value={formatEUR(project.budgetTarget)} icon={<Wallet className="h-4 w-4" />} />
         <StatCard label="Engagé" value={formatEUR(stats.engaged)} hint="Devis retenus + coûts réels" icon={<TrendingUp className="h-4 w-4" />} tone="info" />
-        <StatCard label="Reste disponible" value={formatEUR(project.budgetTarget - stats.engaged)} hint={`sur ${formatEUR(project.budgetTarget)}`} icon={<TrendingDown className="h-4 w-4" />} tone={project.budgetTarget - stats.engaged < 0 ? "danger" : "success"} />
+        <StatCard label="Reste disponible" value={formatEUR(project.budgetTarget - stats.engaged)} icon={<TrendingDown className="h-4 w-4" />} tone={project.budgetTarget - stats.engaged < 0 ? "danger" : "success"} />
         <StatCard label="Avancement" value={`${stats.progress}%`} hint={`${stats.lotsDone} / ${stats.lotsTotal} lots terminés`} icon={<Gauge className="h-4 w-4" />} />
       </div>
 
       <div className="space-y-3">
         <p className="text-sm font-medium text-muted-foreground">Scénarios budgétaires — réserve imprévus {formatEUR(RESERVE)} incluse</p>
         <div className="hidden sm:grid sm:grid-cols-3 sm:gap-4">
-          <StatCard label="Optimiste" value={formatEUR(optimisticTotal + RESERVE)} hint={`Lots seuls : ${formatEUR(optimisticTotal)}`} icon={<TrendingDown className="h-4 w-4" />} tone={optimisticTotal + RESERVE <= project.budgetTarget ? "success" : "warning"} />
-          <StatCard label="Retenu (pilotage)" value={formatEUR(retainedWithReserve)} hint={`Lots seuls : ${formatEUR(retainedTotal)}`} icon={<Gauge className="h-4 w-4" />} tone={targetGapRetained >= 0 ? "info" : "warning"} />
-          <StatCard label="Pessimiste" value={formatEUR(pessimisticWithReserve)} hint={`Lots seuls : ${formatEUR(pessimisticTotal)}`} icon={<TrendingUp className="h-4 w-4" />} tone="danger" />
+          <StatCard label="Optimiste" value={formatEUR(optimisticTotal + RESERVE)} icon={<TrendingDown className="h-4 w-4" />} tone={optimisticTotal + RESERVE <= project.budgetTarget ? "success" : "warning"} />
+          <StatCard label="Retenu (pilotage)" value={formatEUR(retainedWithReserve)} icon={<Gauge className="h-4 w-4" />} tone={targetGapRetained >= 0 ? "info" : "warning"} />
+          <StatCard label="Pessimiste" value={formatEUR(pessimisticWithReserve)} icon={<TrendingUp className="h-4 w-4" />} tone="danger" />
         </div>
       </div>
 
@@ -98,7 +111,7 @@ function BudgetPage() {
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-warning/20 text-warning-foreground"><AlertTriangle className="h-4 w-4" /></div>
             <div className="text-sm">
               <p className="font-medium">Scénario retenu au-dessus du budget cible</p>
-              <p className="text-muted-foreground">Le scénario de pilotage dépasse de <span className="font-medium text-warning-foreground">{formatEUR(Math.abs(targetGapRetained))}</span> le budget cible.</p>
+              <p className="text-muted-foreground">Dépasse de <span className="font-medium text-warning-foreground">{formatEUR(Math.abs(targetGapRetained))}</span> le budget cible.</p>
             </div>
           </CardContent>
         </Card>
@@ -109,7 +122,7 @@ function BudgetPage() {
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-destructive/15 text-destructive"><CircleAlert className="h-4 w-4" /></div>
             <div className="text-sm">
               <p className="font-medium">Risque de dépassement important</p>
-              <p className="text-muted-foreground">En scénario pessimiste, le projet dépasse le budget de <span className="font-medium text-destructive">{formatEUR(Math.abs(targetGapPessimistic))}</span>.</p>
+              <p className="text-muted-foreground">Dépasse de <span className="font-medium text-destructive">{formatEUR(Math.abs(targetGapPessimistic))}</span> en pessimiste.</p>
             </div>
           </CardContent>
         </Card>
