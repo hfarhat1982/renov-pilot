@@ -76,10 +76,8 @@ function JournalPage() {
     return () => { cancelled = true; };
   }, [id]);
 
-  if (data === "not-found") return <div className="py-12 text-center text-muted-foreground">Projet introuvable.</div>;
-  if (!data) return <Spinner />;
-
-  const { project, decisions, notes, lots } = data;
+  const decisions = data && data !== "not-found" ? data.decisions : [];
+  const notes = data && data !== "not-found" ? data.notes : [];
 
   const filtered = useMemo(
     () => decisions
@@ -93,6 +91,11 @@ function JournalPage() {
     abandonnee: decisions.filter((d) => d.status === "abandonnee").length,
   }), [decisions]);
   const sortedNotes = useMemo(() => [...notes].sort((a, b) => b.date.localeCompare(a.date)), [notes]);
+
+  if (data === "not-found") return <div className="py-12 text-center text-muted-foreground">Projet introuvable.</div>;
+  if (!data) return <Spinner />;
+
+  const { project, lots } = data;
 
   return (
     <div className="space-y-6">

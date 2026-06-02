@@ -39,14 +39,14 @@ function DocumentsPage() {
     return () => { cancelled = true; };
   }, [id]);
 
-  if (documents === "not-found") return <div className="py-12 text-center text-muted-foreground">Projet introuvable.</div>;
-  if (documents === null) return <Spinner />;
-
   const cats: Cat[] = ["all", ...(Object.keys(documentCategoryLabel) as DocumentItem["category"][])];
   const filtered = useMemo(
-    () => documents.filter((d) => cat === "all" || d.category === cat),
+    () => (!documents || documents === "not-found") ? [] : documents.filter((d) => cat === "all" || d.category === cat),
     [documents, cat],
   );
+
+  if (documents === "not-found") return <div className="py-12 text-center text-muted-foreground">Projet introuvable.</div>;
+  if (documents === null) return <Spinner />;
 
   return (
     <div className="space-y-6">

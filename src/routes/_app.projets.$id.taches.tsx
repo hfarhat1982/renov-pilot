@@ -42,17 +42,18 @@ function TasksPage() {
     return () => { cancelled = true; };
   }, [id]);
 
+  const filtered = useMemo(() => {
+    if (!data || data === "not-found") return [];
+    return data.tasks
+      .filter((t) => (tab === "all" ? true : t.status === tab))
+      .filter((t) => t.title.toLowerCase().includes(q.toLowerCase()))
+      .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+  }, [data, q, tab]);
+
   if (data === "not-found") return <div className="py-12 text-center text-muted-foreground">Projet introuvable.</div>;
   if (!data) return <Spinner />;
 
   const { tasks, lots } = data;
-  const filtered = useMemo(() => {
-    return tasks
-      .filter((t) => (tab === "all" ? true : t.status === tab))
-      .filter((t) => t.title.toLowerCase().includes(q.toLowerCase()))
-      .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
-  }, [tasks, q, tab]);
-
   const lotName = (lotId: string | null) => lotId ? (lots.find((l) => l.id === lotId)?.name ?? "—") : "—";
 
   return (
