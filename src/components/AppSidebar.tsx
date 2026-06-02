@@ -145,7 +145,7 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={currentPath === "/projets" || currentPath.startsWith("/projets/")}
+                  isActive={/^\/projets\/?$/.test(currentPath) || /^\/projets\/[^/]+\/?$/.test(currentPath)}
                   tooltip="Projets"
                 >
                   <Link to="/projets" onClick={() => setOpenMobile(false)}>

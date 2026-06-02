@@ -14,7 +14,7 @@ import { formatDate, formatEUR, projectStatusLabel } from "@/lib/mockData";
 import { getProjectById, getProjectStats } from "@/lib/services/projects";
 import { getLotsByProject } from "@/lib/services/lots";
 import { getTasksByProject } from "@/lib/services/tasks";
-import { getAlerts } from "@/lib/services/alerts";
+import { getAlertsByProjectOnly } from "@/lib/services/alerts";
 import { getDecisionsByProject } from "@/lib/services/decisions";
 import { FormAddNote } from "@/components/forms/FormAddNote";
 import type { Project, Lot, Task, Alert, Decision } from "@/lib/types";
@@ -54,7 +54,7 @@ function Dashboard() {
         getProjectStats(project.id),
         getLotsByProject(project.id),
         getTasksByProject(project.id),
-        getAlerts(),
+        getAlertsByProjectOnly(project.id),
         getDecisionsByProject(project.id),
       ]);
       if (!cancelled) setData({ project, stats, lots, tasks, alerts, decisions });

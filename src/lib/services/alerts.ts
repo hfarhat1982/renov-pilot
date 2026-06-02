@@ -22,6 +22,17 @@ export async function getAlerts(): Promise<Alert[]> {
   return data.map(toAlert);
 }
 
+export async function getAlertsByProjectOnly(projectId: string): Promise<Alert[]> {
+  const { data, error } = await supabase
+    .from("alerts")
+    .select("*")
+    .eq("project_id", projectId)
+    .eq("is_resolved", false)
+    .order("alert_date", { ascending: false });
+  if (error || !data) return [];
+  return data.map(toAlert);
+}
+
 // Alert n'a pas de champ projectId côté frontend — filtre en base, retourne tout si vide.
 export async function getAlertsByProject(projectId: string): Promise<Alert[]> {
   const { data, error } = await supabase
