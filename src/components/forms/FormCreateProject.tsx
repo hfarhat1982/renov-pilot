@@ -32,7 +32,12 @@ const defaultState = {
   start_date: "",
 };
 
-export function FormCreateProject() {
+interface FormCreateProjectProps {
+  onSuccess?: (projectId: string) => void;
+  compact?: boolean;
+}
+
+export function FormCreateProject({ onSuccess, compact }: FormCreateProjectProps = {}) {
   const router = useRouter();
   const [fields, setFields] = useState(defaultState);
   const [loading, setLoading] = useState(false);
@@ -41,7 +46,7 @@ export function FormCreateProject() {
     e.preventDefault();
     setLoading(true);
     try {
-      await createProject({
+      const project = await createProject({
         name: fields.name.trim(),
         project_type: fields.project_type,
         surface_m2: fields.surface_m2 ? parseFloat(fields.surface_m2) : 0,
@@ -49,7 +54,11 @@ export function FormCreateProject() {
         start_date: fields.start_date,
       });
       toast.success("Projet créé !");
-      router.invalidate();
+      if (onSuccess) {
+        onSuccess(project.id);
+      } else {
+        router.invalidate();
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur lors de la création du projet.");
     } finally {
@@ -57,9 +66,8 @@ export function FormCreateProject() {
     }
   }
 
-  return (
-    <div className="flex min-h-[60vh] items-center justify-center px-4">
-      <div className="w-full max-w-md space-y-6">
+  const formContent = (
+    <div className="w-full max-w-md space-y-6">
         <div className="flex flex-col items-center gap-2 text-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
             <Hammer className="h-6 w-6" />
@@ -144,6 +152,13 @@ export function FormCreateProject() {
           </Button>
         </form>
       </div>
+  );
+
+  if (compact) return formContent;
+
+  return (
+    <div className="flex min-h-[60vh] items-center justify-center px-4">
+      {formContent}
     </div>
   );
 }

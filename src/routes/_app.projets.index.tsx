@@ -1,11 +1,17 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { ArrowRight, FolderKanban } from "lucide-react";
+import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
+import { useState } from "react";
+import { ArrowRight, FolderKanban, Plus } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusPill } from "@/components/StatusBadges";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 import { formatEUR, projectStatusLabel } from "@/lib/mockData";
 import { getSupabaseProjectsOnly } from "@/lib/services/projects";
+import { storeProjectId } from "@/lib/activeProject";
+import { FormCreateProject } from "@/components/forms/FormCreateProject";
 
 export const Route = createFileRoute("/_app/projets/")({
   head: () => ({ meta: [{ title: "Projets — RenoV Pilot" }] }),
@@ -19,6 +25,33 @@ export const Route = createFileRoute("/_app/projets/")({
 function ProjectsList() {
   const { projects } = Route.useLoaderData();
   const router = useRouter();
+  const navigate = useNavigate();
+  const [createOpen, setCreateOpen] = useState(false);
+
+  function handleProjectCreated(projectId: string) {
+    storeProjectId(projectId);
+    setCreateOpen(false);
+    router.invalidate();
+    navigate({ to: "/projets/$id/dashboard", params: { id: projectId } });
+  }
+
+  const createButton = (
+    <Button size="sm" onClick={() => setCreateOpen(true)}>
+      <Plus className="mr-1 h-4 w-4" />
+      Nouveau projet
+    </Button>
+  );
+
+  const createDialog = (
+    <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Nouveau projet</DialogTitle>
+        </DialogHeader>
+        <FormCreateProject compact onSuccess={handleProjectCreated} />
+      </DialogContent>
+    </Dialog>
+  );
 
   if (projects.length === 0) {
     return (
@@ -37,10 +70,9 @@ function ProjectsList() {
               Créez votre premier projet pour commencer le suivi.
             </p>
           </div>
-          <Button onClick={() => router.navigate({ to: "/dashboard" })}>
-            Créer mon premier projet
-          </Button>
+          {createButton}
         </div>
+        {createDialog}
       </div>
     );
   }
@@ -50,6 +82,7 @@ function ProjectsList() {
       <PageHeader
         title="Projets"
         description="Tous vos projets de rénovation en cours et à venir."
+        actions={createButton}
       />
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -88,6 +121,7 @@ function ProjectsList() {
           </Card>
         ))}
       </div>
+      {createDialog}
     </div>
   );
 }

@@ -45,10 +45,26 @@ export function AppSidebar() {
   useEffect(() => {
     getSupabaseProjectsOnly().then((ps) => {
       setProjects(ps);
-      const stored = getStoredProjectId();
-      setActiveId(stored ?? ps[0]?.id ?? "");
+      const urlMatch = currentPath.match(/\/projets\/([^/]+)\/[^/]+/);
+      const urlId = urlMatch?.[1];
+      if (urlId && ps.some((p) => p.id === urlId)) {
+        storeProjectId(urlId);
+        setActiveId(urlId);
+      } else {
+        const stored = getStoredProjectId();
+        setActiveId(stored ?? ps[0]?.id ?? "");
+      }
     });
   }, []);
+
+  useEffect(() => {
+    const urlMatch = currentPath.match(/\/projets\/([^/]+)\/[^/]+/);
+    const urlId = urlMatch?.[1];
+    if (urlId && urlId !== activeId) {
+      storeProjectId(urlId);
+      setActiveId(urlId);
+    }
+  }, [currentPath]);
 
   function handleProjectChange(id: string) {
     storeProjectId(id);
