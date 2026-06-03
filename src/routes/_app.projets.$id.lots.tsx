@@ -15,6 +15,7 @@ import { getProjectById } from "@/lib/services/projects";
 import { getLotsByProject } from "@/lib/services/lots";
 import { getArtisans } from "@/lib/services/artisans";
 import { FormAddDevis } from "@/components/forms/FormAddDevis";
+import { FormAddLot } from "@/components/forms/FormAddLot";
 import { FormLotStatus } from "@/components/forms/FormLotStatus";
 import type { Lot, Artisan } from "@/lib/types";
 
@@ -35,6 +36,7 @@ function LotsPage() {
   const { id } = Route.useParams();
   const [data, setData] = useState<Data | null | "not-found">(null);
   const [q, setQ] = useState("");
+  const [addLotOpen, setAddLotOpen] = useState(false);
   const [devisOpen, setDevisOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
   const [activeLotId, setActiveLotId] = useState<string | undefined>();
@@ -57,6 +59,7 @@ function LotsPage() {
   const filtered = lots.filter((l) => l.name.toLowerCase().includes(q.toLowerCase()));
   const artisanName = (aid: string | null) => aid ? (artisans.find((a) => a.id === aid)?.name ?? "—") : "—";
   const openStatus = (lotId: string) => { setActiveLotId(lotId); setStatusOpen(true); };
+  const handleLotCreated = (lot: Lot) => setData((d) => d && d !== "not-found" ? { ...d, lots: [...d.lots, lot] } : d);
 
   return (
     <div className="space-y-6">
@@ -64,9 +67,14 @@ function LotsPage() {
         title="Lots travaux"
         description="Tous les lots du projet, leur budget et leur avancement."
         actions={
-          <Button size="sm" variant="outline" onClick={() => setDevisOpen(true)}>
-            <Plus className="mr-1 h-4 w-4" />Ajouter devis
-          </Button>
+          <div className="flex gap-2">
+            <Button size="sm" onClick={() => setAddLotOpen(true)}>
+              <Plus className="mr-1 h-4 w-4" />Ajouter un lot
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => setDevisOpen(true)}>
+              <Plus className="mr-1 h-4 w-4" />Ajouter devis
+            </Button>
+          </div>
         }
       />
 
@@ -141,6 +149,12 @@ function LotsPage() {
         </>
       )}
 
+      <FormAddLot
+        open={addLotOpen}
+        onOpenChange={setAddLotOpen}
+        projectId={id}
+        onCreated={handleLotCreated}
+      />
       <FormAddDevis open={devisOpen} onOpenChange={setDevisOpen} lots={lots} />
       <FormLotStatus
         open={statusOpen}
