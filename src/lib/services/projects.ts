@@ -49,7 +49,48 @@ export async function getActiveProject(): Promise<Project> {
 }
 
 export async function getProjectStats(projectId: string) {
-  return computeProjectStats(projectId);
+  const [projectRes, lotsRes] = await Promise.all([
+    supabase.from("projects").select("budget_target_cents").eq("id", projectId).maybeSingle(),
+    supabase.from("lots").select("id, budget_planned_cents, real_cost_cents, status").eq("project_id", projectId),
+  ]);
+
+  // Fall back to mock stats for non-Supabase (demo) projects
+  if (projectRes.error || !projectRes.data) {
+    return computeProjectStats(projectId);
+  }
+
+  const lots = lotsRes.data ?? [];
+
+  // Fetch retained quotes to compute engaged amount
+  const lotIds = lots.map((l) => l.id);
+  let retainedByLot = new Map<string, number>();
+  if (lotIds.length > 0) {
+    const { data: quotes } = await supabase
+      .from("quotes")
+      .select("lot_id, amount_cents")
+      .in("lot_id", lotIds)
+      .eq("is_retained", true);
+    for (const q of quotes ?? []) retainedByLot.set(q.lot_id, (q.amount_cents ?? 0) / 100);
+  }
+
+  const budgetPlanned = lots.reduce((s, l) => s + (l.budget_planned_cents ?? 0) / 100, 0);
+  const engaged = lots.reduce((s, l) => {
+    const realCost = l.real_cost_cents !== null ? l.real_cost_cents / 100 : null;
+    const quote = retainedByLot.get(l.id) ?? null;
+    return s + (realCost ?? quote ?? 0);
+  }, 0);
+  const target = projectRes.data.budget_target_cents / 100;
+  const lotsDone = lots.filter((l) => l.status === "termine").length;
+
+  return {
+    budgetPlanned,
+    engaged,
+    remaining: target - engaged,
+    target,
+    progress: lots.length ? Math.round((lotsDone / lots.length) * 100) : 0,
+    lotsTotal: lots.length,
+    lotsDone,
+  };
 }
 
 export async function resolveActiveProject(): Promise<Project | null> {
