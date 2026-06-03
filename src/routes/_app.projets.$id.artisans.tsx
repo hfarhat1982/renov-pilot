@@ -3,11 +3,13 @@ import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArtisanStatusBadge } from "@/components/StatusBadges";
-import { Phone, Mail, Star } from "lucide-react";
+import { Phone, Mail, Star, Plus } from "lucide-react";
 import { formatEUR } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { getProjectById } from "@/lib/services/projects";
 import { getArtisansByProject } from "@/lib/services/artisans";
+import { FormAddArtisan } from "@/components/forms/FormAddArtisan";
 import type { Artisan } from "@/lib/types";
 
 export const Route = createFileRoute("/_app/projets/$id/artisans")({
@@ -34,6 +36,8 @@ function Rating({ value }: { value: number }) {
 function ArtisansPage() {
   const { id } = Route.useParams();
   const [artisans, setArtisans] = useState<Artisan[] | null | "not-found">(null);
+  const [addOpen, setAddOpen] = useState(false);
+  const [projectId, setProjectId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -41,7 +45,7 @@ function ArtisansPage() {
       if (cancelled) return;
       if (!project) { setArtisans("not-found"); return; }
       const list = await getArtisansByProject(project.id);
-      if (!cancelled) setArtisans(list);
+      if (!cancelled) { setProjectId(project.id); setArtisans(list); }
     });
     return () => { cancelled = true; };
   }, [id]);
@@ -51,7 +55,15 @@ function ArtisansPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Artisans & contacts" description="Annuaire des artisans consultés pour le projet." />
+      <PageHeader
+        title="Artisans & contacts"
+        description="Annuaire des artisans consultés pour le projet."
+        actions={
+          <Button size="sm" variant="outline" onClick={() => setAddOpen(true)}>
+            <Plus className="mr-1 h-4 w-4" />Ajouter un artisan
+          </Button>
+        }
+      />
 
       {artisans.length === 0 ? (
         <p className="py-12 text-center text-sm text-muted-foreground">Aucun artisan pour ce projet.</p>
@@ -84,6 +96,14 @@ function ArtisansPage() {
             </Card>
           ))}
         </div>
+      )}
+
+      {projectId && (
+        <FormAddArtisan
+          open={addOpen}
+          onOpenChange={setAddOpen}
+          projectId={projectId}
+        />
       )}
     </div>
   );
