@@ -103,6 +103,7 @@ function ArtisansPage() {
           open={addOpen}
           onOpenChange={setAddOpen}
           projectId={projectId}
+          onCreated={(a) => setArtisans((prev) => (Array.isArray(prev) ? [...prev, a] : [a]))}
         />
       )}
     </div>

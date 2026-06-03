@@ -12,11 +12,13 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { createArtisan } from "@/lib/services/artisans";
+import type { Artisan } from "@/lib/types";
 
 interface FormAddArtisanProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   projectId: string;
+  onCreated?: (artisan: Artisan) => void;
 }
 
 const defaultState = {
@@ -28,7 +30,7 @@ const defaultState = {
   trust_rating: "3",
 };
 
-export function FormAddArtisan({ open, onOpenChange, projectId }: FormAddArtisanProps) {
+export function FormAddArtisan({ open, onOpenChange, projectId, onCreated }: FormAddArtisanProps) {
   const router = useRouter();
   const [fields, setFields] = useState(defaultState);
   const [loading, setLoading] = useState(false);
@@ -40,7 +42,7 @@ export function FormAddArtisan({ open, onOpenChange, projectId }: FormAddArtisan
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      await createArtisan({
+      const artisan = await createArtisan({
         name: fields.name.trim(),
         trade: fields.trade.trim(),
         phone: fields.phone.trim() || undefined,
@@ -50,6 +52,7 @@ export function FormAddArtisan({ open, onOpenChange, projectId }: FormAddArtisan
         project_id: projectId,
       });
       toast.success("Artisan ajouté.");
+      onCreated?.(artisan);
       reset();
       onOpenChange(false);
       router.invalidate();
