@@ -87,24 +87,8 @@ export function AppSidebar() {
         currentPath.startsWith(`/projets/${activeId}/${section}/`)
       : false;
 
-  function ProjectSectionLink({ section, children }: { section: Section; children: React.ReactNode }) {
-    if (activeId) {
-      return (
-        <Link
-          to={`/projets/${activeId}/${section}` as any}
-          className="flex items-center gap-2"
-          onClick={() => setOpenMobile(false)}
-        >
-          {children}
-        </Link>
-      );
-    }
-    return (
-      <Link to="/projets" className="flex items-center gap-2" onClick={() => setOpenMobile(false)}>
-        {children}
-      </Link>
-    );
-  }
+  const sectionTo = (section: Section) =>
+    activeId ? (`/projets/${activeId}/${section}` as any) : ("/projets" as any);
 
   return (
     <Sidebar collapsible="icon">
@@ -157,10 +141,14 @@ export function AppSidebar() {
               {mainSections.map(({ title, section, icon: Icon }) => (
                 <SidebarMenuItem key={section}>
                   <SidebarMenuButton asChild isActive={isProjectSection(section)} tooltip={title}>
-                    <ProjectSectionLink section={section}>
+                    <Link
+                      to={sectionTo(section)}
+                      className="flex items-center gap-2"
+                      onClick={() => setOpenMobile(false)}
+                    >
                       <Icon className="h-4 w-4" />
                       <span>{title}</span>
-                    </ProjectSectionLink>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -175,10 +163,14 @@ export function AppSidebar() {
               {resourceSections.map(({ title, section, icon: Icon }) => (
                 <SidebarMenuItem key={section}>
                   <SidebarMenuButton asChild isActive={isProjectSection(section)} tooltip={title}>
-                    <ProjectSectionLink section={section}>
+                    <Link
+                      to={sectionTo(section)}
+                      className="flex items-center gap-2"
+                      onClick={() => setOpenMobile(false)}
+                    >
                       <Icon className="h-4 w-4" />
                       <span>{title}</span>
-                    </ProjectSectionLink>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
