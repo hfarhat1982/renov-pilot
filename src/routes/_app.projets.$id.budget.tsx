@@ -96,36 +96,44 @@ function BudgetPage() {
         <StatCard label="Avancement" value={`${stats.progress}%`} hint={`${stats.lotsDone} / ${stats.lotsTotal} lots terminés`} icon={<Gauge className="h-4 w-4" />} />
       </div>
 
-      <div className="space-y-3">
-        <p className="text-sm font-medium text-muted-foreground">Scénarios budgétaires — réserve imprévus {formatEUR(RESERVE)} incluse</p>
-        <div className="hidden sm:grid sm:grid-cols-3 sm:gap-4">
-          <StatCard label="Optimiste" value={formatEUR(optimisticTotal + RESERVE)} icon={<TrendingDown className="h-4 w-4" />} tone={optimisticTotal + RESERVE <= project.budgetTarget ? "success" : "warning"} />
-          <StatCard label="Retenu (pilotage)" value={formatEUR(retainedWithReserve)} icon={<Gauge className="h-4 w-4" />} tone={targetGapRetained >= 0 ? "info" : "warning"} />
-          <StatCard label="Pessimiste" value={formatEUR(pessimisticWithReserve)} icon={<TrendingUp className="h-4 w-4" />} tone="danger" />
+      {projectLots.length === 0 ? (
+        <div className="rounded-lg border border-border/60 bg-muted/30 p-6 text-center text-sm text-muted-foreground">
+          Ajoutez des lots pour calculer les scénarios budgétaires.
         </div>
-      </div>
+      ) : (
+        <>
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-muted-foreground">Scénarios budgétaires — réserve imprévus {formatEUR(RESERVE)} incluse</p>
+            <div className="hidden sm:grid sm:grid-cols-3 sm:gap-4">
+              <StatCard label="Optimiste" value={formatEUR(optimisticTotal + RESERVE)} icon={<TrendingDown className="h-4 w-4" />} tone={optimisticTotal + RESERVE <= project.budgetTarget ? "success" : "warning"} />
+              <StatCard label="Retenu (pilotage)" value={formatEUR(retainedWithReserve)} icon={<Gauge className="h-4 w-4" />} tone={targetGapRetained >= 0 ? "info" : "warning"} />
+              <StatCard label="Pessimiste" value={formatEUR(pessimisticWithReserve)} icon={<TrendingUp className="h-4 w-4" />} tone="danger" />
+            </div>
+          </div>
 
-      {targetGapRetained < 0 && (
-        <Card className="border-warning/40 bg-warning/5 shadow-sm">
-          <CardContent className="flex items-start gap-3 p-4">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-warning/20 text-warning-foreground"><AlertTriangle className="h-4 w-4" /></div>
-            <div className="text-sm">
-              <p className="font-medium">Scénario retenu au-dessus du budget cible</p>
-              <p className="text-muted-foreground">Dépasse de <span className="font-medium text-warning-foreground">{formatEUR(Math.abs(targetGapRetained))}</span> le budget cible.</p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-      {targetGapPessimistic < 0 && (
-        <Card className="border-destructive/40 bg-destructive/5 shadow-sm">
-          <CardContent className="flex items-start gap-3 p-4">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-destructive/15 text-destructive"><CircleAlert className="h-4 w-4" /></div>
-            <div className="text-sm">
-              <p className="font-medium">Risque de dépassement important</p>
-              <p className="text-muted-foreground">Dépasse de <span className="font-medium text-destructive">{formatEUR(Math.abs(targetGapPessimistic))}</span> en pessimiste.</p>
-            </div>
-          </CardContent>
-        </Card>
+          {targetGapRetained < 0 && (
+            <Card className="border-warning/40 bg-warning/5 shadow-sm">
+              <CardContent className="flex items-start gap-3 p-4">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-warning/20 text-warning-foreground"><AlertTriangle className="h-4 w-4" /></div>
+                <div className="text-sm">
+                  <p className="font-medium">Scénario retenu au-dessus du budget cible</p>
+                  <p className="text-muted-foreground">Dépasse de <span className="font-medium text-warning-foreground">{formatEUR(Math.abs(targetGapRetained))}</span> le budget cible.</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          {targetGapPessimistic < 0 && (
+            <Card className="border-destructive/40 bg-destructive/5 shadow-sm">
+              <CardContent className="flex items-start gap-3 p-4">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-destructive/15 text-destructive"><CircleAlert className="h-4 w-4" /></div>
+                <div className="text-sm">
+                  <p className="font-medium">Risque de dépassement important</p>
+                  <p className="text-muted-foreground">Dépasse de <span className="font-medium text-destructive">{formatEUR(Math.abs(targetGapPessimistic))}</span> en pessimiste.</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </>
       )}
 
       {projectLots.length === 0 ? (
