@@ -134,7 +134,7 @@ export function AppSidebar() {
                 >
                   <Link to="/projets" onClick={() => setOpenMobile(false)}>
                     <FolderKanban className="h-4 w-4" />
-                    <span>Projets</span>
+                    <span className="group-data-[collapsible=icon]:hidden">Projets</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -147,7 +147,7 @@ export function AppSidebar() {
                       onClick={() => setOpenMobile(false)}
                     >
                       <Icon className="h-4 w-4" />
-                      <span>{title}</span>
+                      <span className="group-data-[collapsible=icon]:hidden">{title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -169,7 +169,7 @@ export function AppSidebar() {
                       onClick={() => setOpenMobile(false)}
                     >
                       <Icon className="h-4 w-4" />
-                      <span>{title}</span>
+                      <span className="group-data-[collapsible=icon]:hidden">{title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -182,7 +182,7 @@ export function AppSidebar() {
                 >
                   <Link to="/copilote" onClick={() => setOpenMobile(false)}>
                     <Sparkles className="h-4 w-4" />
-                    <span>Copilote IA</span>
+                    <span className="group-data-[collapsible=icon]:hidden">Copilote IA</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -196,7 +196,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton onClick={handleSignOut} tooltip="Déconnexion">
               <LogOut className="h-4 w-4" />
-              <span>Déconnexion</span>
+              <span className="group-data-[collapsible=icon]:hidden">Déconnexion</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
