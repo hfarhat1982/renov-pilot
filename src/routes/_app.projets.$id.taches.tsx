@@ -6,12 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PriorityBadge, TaskStatusBadge } from "@/components/StatusBadges";
-import { Calendar, Plus, User } from "lucide-react";
+import { Calendar, Pencil, Plus, User } from "lucide-react";
 import { formatDate, type TaskStatus } from "@/lib/mockData";
 import { getProjectById } from "@/lib/services/projects";
 import { getTasksByProject } from "@/lib/services/tasks";
 import { getLotsByProject } from "@/lib/services/lots";
 import { FormAddTask } from "@/components/forms/FormAddTask";
+import { FormEditTask } from "@/components/forms/FormEditTask";
 import type { Task, Lot } from "@/lib/types";
 
 export const Route = createFileRoute("/_app/projets/$id/taches")({
@@ -33,6 +34,7 @@ function TasksPage() {
   const [q, setQ] = useState("");
   const [tab, setTab] = useState<"all" | TaskStatus>("all");
   const [showForm, setShowForm] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -93,6 +95,31 @@ function TasksPage() {
         }
       />
 
+      {editingTask && (
+        <FormEditTask
+          open={!!editingTask}
+          onOpenChange={(v) => { if (!v) setEditingTask(null); }}
+          task={editingTask}
+          lots={lots}
+          onUpdated={(updated) => {
+            setData((prev) =>
+              prev && prev !== "not-found"
+                ? { ...prev, tasks: prev.tasks.map((t) => (t.id === updated.id ? updated : t)) }
+                : prev
+            );
+            setEditingTask(null);
+          }}
+          onDeleted={(deletedId) => {
+            setData((prev) =>
+              prev && prev !== "not-found"
+                ? { ...prev, tasks: prev.tasks.filter((t) => t.id !== deletedId) }
+                : prev
+            );
+            setEditingTask(null);
+          }}
+        />
+      )}
+
       <div className="space-y-3">
         {filtered.map((t) => (
           <Card key={t.id} className="border-border/60 shadow-sm">
@@ -109,6 +136,14 @@ function TasksPage() {
               <div className="flex shrink-0 items-center gap-2">
                 <PriorityBadge priority={t.priority} />
                 <TaskStatusBadge status={t.status} />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setEditingTask(t)}
+                  aria-label="Modifier la tâche"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
               </div>
             </CardContent>
           </Card>

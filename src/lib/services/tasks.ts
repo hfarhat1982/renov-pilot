@@ -78,3 +78,38 @@ export async function createTask(input: {
   if (error) throw error;
   return toTask(data);
 }
+
+export async function updateTask(
+  id: string,
+  input: {
+    title?: string;
+    lot_id?: string | null;
+    assignee_name?: string;
+    priority?: Priority;
+    status?: TaskStatus;
+    due_date?: string | null;
+    notes?: string;
+  }
+): Promise<Task> {
+  const { data, error } = await supabase
+    .from("tasks")
+    .update({
+      ...(input.title !== undefined && { title: input.title }),
+      ...(input.lot_id !== undefined && { lot_id: input.lot_id }),
+      ...(input.assignee_name !== undefined && { assignee_name: input.assignee_name }),
+      ...(input.priority !== undefined && { priority: input.priority }),
+      ...(input.status !== undefined && { status: input.status }),
+      ...(input.due_date !== undefined && { due_date: input.due_date }),
+      ...(input.notes !== undefined && { notes: input.notes }),
+    })
+    .eq("id", id)
+    .select()
+    .single();
+  if (error) throw error;
+  return toTask(data);
+}
+
+export async function deleteTask(id: string): Promise<void> {
+  const { error } = await supabase.from("tasks").delete().eq("id", id);
+  if (error) throw error;
+}
