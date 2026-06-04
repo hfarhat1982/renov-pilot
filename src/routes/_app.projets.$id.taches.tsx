@@ -3,13 +3,15 @@ import { useEffect, useMemo, useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PriorityBadge, TaskStatusBadge } from "@/components/StatusBadges";
-import { Calendar, User } from "lucide-react";
+import { Calendar, Plus, User } from "lucide-react";
 import { formatDate, type TaskStatus } from "@/lib/mockData";
 import { getProjectById } from "@/lib/services/projects";
 import { getTasksByProject } from "@/lib/services/tasks";
 import { getLotsByProject } from "@/lib/services/lots";
+import { FormAddTask } from "@/components/forms/FormAddTask";
 import type { Task, Lot } from "@/lib/types";
 
 export const Route = createFileRoute("/_app/projets/$id/taches")({
@@ -30,6 +32,7 @@ function TasksPage() {
   const [data, setData] = useState<Data | null | "not-found">(null);
   const [q, setQ] = useState("");
   const [tab, setTab] = useState<"all" | TaskStatus>("all");
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -69,8 +72,26 @@ function TasksPage() {
             <TabsTrigger value="termine">Terminé</TabsTrigger>
           </TabsList>
         </Tabs>
-        <Input placeholder="Rechercher…" value={q} onChange={(e) => setQ(e.target.value)} className="sm:max-w-xs" />
+        <div className="flex items-center gap-2">
+          <Input placeholder="Rechercher…" value={q} onChange={(e) => setQ(e.target.value)} className="sm:max-w-xs" />
+          <Button onClick={() => setShowForm(true)} className="shrink-0">
+            <Plus className="h-4 w-4 mr-1" />
+            Ajouter une tâche
+          </Button>
+        </div>
       </div>
+
+      <FormAddTask
+        open={showForm}
+        onOpenChange={setShowForm}
+        projectId={id}
+        lots={lots}
+        onCreated={(task) =>
+          setData((prev) =>
+            prev && prev !== "not-found" ? { ...prev, tasks: [task, ...prev.tasks] } : prev
+          )
+        }
+      />
 
       <div className="space-y-3">
         {filtered.map((t) => (

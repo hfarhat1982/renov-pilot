@@ -1,6 +1,7 @@
-import type { Task } from "@/lib/types";
+import type { Task, Priority, TaskStatus } from "@/lib/types";
 import { tasks as mockTasks } from "@/lib/mock/data";
 import { supabase } from "@/lib/supabase/client";
+import { getCurrentUser } from "@/lib/services/auth";
 import type { Tables } from "@/lib/supabase/types";
 
 function toTask(row: Tables<"tasks">): Task {
@@ -45,4 +46,35 @@ export async function getTasksByLot(lotId: string): Promise<Task[]> {
     .order("due_date", { ascending: true, nullsFirst: false });
   if (error || !data || data.length === 0) return mockTasks.filter((t) => t.lotId === lotId);
   return data.map(toTask);
+}
+
+export async function createTask(input: {
+  title: string;
+  project_id: string;
+  lot_id?: string | null;
+  assignee_name?: string;
+  priority?: Priority;
+  status?: TaskStatus;
+  due_date?: string | null;
+  notes?: string;
+}): Promise<Task> {
+  const user = await getCurrentUser();
+  if (!user) throw new Error("Non authentifié");
+  const { data, error } = await supabase
+    .from("tasks")
+    .insert({
+      title: input.title,
+      project_id: input.project_id,
+      owner_id: user.id,
+      lot_id: input.lot_id ?? null,
+      assignee_name: input.assignee_name ?? "",
+      priority: input.priority ?? "moyenne",
+      status: input.status ?? "a_faire",
+      due_date: input.due_date ?? null,
+      notes: input.notes ?? "",
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return toTask(data);
 }
