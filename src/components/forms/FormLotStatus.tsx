@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -19,6 +20,7 @@ import {
 import { toast } from "sonner";
 import type { Lot, LotStatus } from "@/lib/types";
 import { lotStatusLabel } from "@/lib/mockData";
+import { updateLot } from "@/lib/services/lots";
 
 const statusOptions: LotStatus[] = [
   "a_etudier",
@@ -35,12 +37,14 @@ interface FormLotStatusProps {
   onOpenChange: (open: boolean) => void;
   lots: Lot[];
   defaultLotId?: string;
+  onStatusUpdated?: (lotId: string, status: LotStatus) => void;
 }
 
-export function FormLotStatus({ open, onOpenChange, lots, defaultLotId }: FormLotStatusProps) {
+export function FormLotStatus({ open, onOpenChange, lots, defaultLotId, onStatusUpdated }: FormLotStatusProps) {
   const [lotId, setLotId] = useState(defaultLotId ?? "");
   const [newStatus, setNewStatus] = useState<LotStatus>("en_cours");
   const [comment, setComment] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -58,10 +62,19 @@ export function FormLotStatus({ open, onOpenChange, lots, defaultLotId }: FormLo
     if (lot) setNewStatus(lot.status);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const lot = lots.find((l) => l.id === lotId);
-    toast.success(`Statut de « ${lot?.name ?? lotId} » mis à jour — sera persisté avec Supabase.`);
-    onOpenChange(false);
+    setLoading(true);
+    try {
+      await updateLot(lotId, { status: newStatus });
+      toast.success(`Statut de « ${lot?.name ?? lotId} » mis à jour.`);
+      onStatusUpdated?.(lotId, newStatus);
+      onOpenChange(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur lors de la mise à jour du statut.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -69,11 +82,10 @@ export function FormLotStatus({ open, onOpenChange, lots, defaultLotId }: FormLo
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Modifier le statut d'un lot</DialogTitle>
+          <DialogDescription className="sr-only">
+            Formulaire de changement de statut d'un lot travaux.
+          </DialogDescription>
         </DialogHeader>
-
-        <div className="rounded-md bg-secondary/60 px-3 py-2 text-xs text-muted-foreground">
-          Action simulée — sera persistée avec Supabase.
-        </div>
 
         <div className="grid gap-4">
           <div className="grid gap-1.5">
@@ -122,11 +134,11 @@ export function FormLotStatus({ open, onOpenChange, lots, defaultLotId }: FormLo
         </div>
 
         <DialogFooter className="flex-col-reverse gap-2 sm:flex-row">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
             Annuler
           </Button>
-          <Button onClick={handleSubmit} disabled={!lotId}>
-            Enregistrer
+          <Button onClick={handleSubmit} disabled={!lotId || loading}>
+            {loading ? "Enregistrement…" : "Enregistrer"}
           </Button>
         </DialogFooter>
       </DialogContent>

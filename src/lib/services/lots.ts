@@ -2,7 +2,7 @@ import type { Lot, LotStatus, Priority } from "@/lib/types";
 import { lots as mockLots } from "@/lib/mock/data";
 import { supabase } from "@/lib/supabase/client";
 import { getCurrentUser } from "@/lib/services/auth";
-import type { Tables } from "@/lib/supabase/types";
+import type { Tables, Database } from "@/lib/supabase/types";
 
 async function fetchRetainedAmountsByProject(projectId: string): Promise<Map<string, number>> {
   const { data } = await supabase
@@ -85,4 +85,37 @@ export async function getLotById(lotId: string): Promise<Lot | undefined> {
   const { data, error } = await supabase.from("lots").select("*").eq("id", lotId).maybeSingle();
   if (error || !data) return mockLots.find((l) => l.id === lotId);
   return toLot(data);
+}
+
+export async function updateLot(
+  lotId: string,
+  input: {
+    name?: string;
+    status?: LotStatus;
+    priority?: Priority;
+    budget_planned?: number;
+    notes?: string;
+  }
+): Promise<Lot> {
+  const patch: Database["public"]["Tables"]["lots"]["Update"] = {};
+  if (input.name !== undefined) patch.name = input.name;
+  if (input.status !== undefined) patch.status = input.status;
+  if (input.priority !== undefined) patch.priority = input.priority;
+  if (input.budget_planned !== undefined)
+    patch.budget_planned_cents = Math.round(input.budget_planned * 100);
+  if (input.notes !== undefined) patch.notes = input.notes;
+
+  const { data, error } = await supabase
+    .from("lots")
+    .update(patch)
+    .eq("id", lotId)
+    .select()
+    .single();
+  if (error) throw error;
+  return { ...toLot(data), quoteReceived: null };
+}
+
+export async function deleteLot(lotId: string): Promise<void> {
+  const { error } = await supabase.from("lots").delete().eq("id", lotId);
+  if (error) throw error;
 }

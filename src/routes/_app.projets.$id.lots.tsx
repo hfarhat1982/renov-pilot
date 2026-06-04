@@ -17,7 +17,8 @@ import { getArtisans } from "@/lib/services/artisans";
 import { FormAddDevis } from "@/components/forms/FormAddDevis";
 import { FormAddLot } from "@/components/forms/FormAddLot";
 import { FormLotStatus } from "@/components/forms/FormLotStatus";
-import type { Lot, Artisan } from "@/lib/types";
+import { FormEditLot } from "@/components/forms/FormEditLot";
+import type { Lot, LotStatus, Artisan } from "@/lib/types";
 
 export const Route = createFileRoute("/_app/projets/$id/lots")({
   head: () => ({ meta: [{ title: "Lots travaux — RenoV Pilot" }] }),
@@ -40,6 +41,8 @@ function LotsPage() {
   const [devisOpen, setDevisOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
   const [activeLotId, setActiveLotId] = useState<string | undefined>();
+  const [editLotOpen, setEditLotOpen] = useState(false);
+  const [editLot, setEditLot] = useState<Lot | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -59,7 +62,20 @@ function LotsPage() {
   const filtered = lots.filter((l) => l.name.toLowerCase().includes(q.toLowerCase()));
   const artisanName = (aid: string | null) => aid ? (artisans.find((a) => a.id === aid)?.name ?? "—") : "—";
   const openStatus = (lotId: string) => { setActiveLotId(lotId); setStatusOpen(true); };
+  const openEdit = (lot: Lot) => { setEditLot(lot); setEditLotOpen(true); };
   const handleLotCreated = (lot: Lot) => setData((d) => d && d !== "not-found" ? { ...d, lots: [...d.lots, lot] } : d);
+  const handleLotUpdated = (updated: Lot) =>
+    setData((d) => d && d !== "not-found"
+      ? { ...d, lots: d.lots.map((l) => l.id === updated.id ? updated : l) }
+      : d);
+  const handleLotDeleted = (lotId: string) =>
+    setData((d) => d && d !== "not-found"
+      ? { ...d, lots: d.lots.filter((l) => l.id !== lotId) }
+      : d);
+  const handleStatusUpdated = (lotId: string, status: LotStatus) =>
+    setData((d) => d && d !== "not-found"
+      ? { ...d, lots: d.lots.map((l) => l.id === lotId ? { ...l, status } : l) }
+      : d);
 
   return (
     <div className="space-y-6">
@@ -108,12 +124,23 @@ function LotsPage() {
                         <TableCell className="font-medium">{l.name}</TableCell>
                         <TableCell className="text-muted-foreground">{artisanName(l.artisanId)}</TableCell>
                         <TableCell><PriorityBadge priority={l.priority} /></TableCell>
-                        <TableCell><LotStatusBadge status={l.status} /></TableCell>
+                        <TableCell>
+                          <button
+                            type="button"
+                            className="cursor-pointer"
+                            onClick={() => openStatus(l.id)}
+                            title="Changer le statut"
+                          >
+                            <LotStatusBadge status={l.status} />
+                          </button>
+                        </TableCell>
                         <TableCell className="text-right tabular-nums">{formatEUR(l.budgetPlanned)}</TableCell>
                         <TableCell className="text-right tabular-nums text-muted-foreground">{formatEUR(l.quoteReceived)}</TableCell>
                         <TableCell className="text-right tabular-nums text-muted-foreground">{formatEUR(l.realCost)}</TableCell>
                         <TableCell className="p-1.5">
-                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openStatus(l.id)}><Pencil className="h-3.5 w-3.5" /></Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(l)}>
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -129,7 +156,14 @@ function LotsPage() {
                 <CardContent className="space-y-3 p-4">
                   <div className="flex items-start justify-between gap-2">
                     <p className="font-medium leading-tight">{l.name}</p>
-                    <LotStatusBadge status={l.status} />
+                    <button
+                      type="button"
+                      className="cursor-pointer"
+                      onClick={() => openStatus(l.id)}
+                      title="Changer le statut"
+                    >
+                      <LotStatusBadge status={l.status} />
+                    </button>
                   </div>
                   <div className="grid grid-cols-3 gap-2 rounded-lg bg-secondary/40 p-2 text-xs text-center">
                     <div><p className="text-muted-foreground">Prévu</p><p className="font-medium tabular-nums">{formatEUR(l.budgetPlanned)}</p></div>
@@ -138,8 +172,8 @@ function LotsPage() {
                   </div>
                   <div className="flex items-center justify-between border-t border-border/60 pt-2">
                     <PriorityBadge priority={l.priority} />
-                    <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => openStatus(l.id)}>
-                      <Pencil className="mr-1 h-3 w-3" />Statut
+                    <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => openEdit(l)}>
+                      <Pencil className="mr-1 h-3 w-3" />Modifier
                     </Button>
                   </div>
                 </CardContent>
@@ -161,7 +195,17 @@ function LotsPage() {
         onOpenChange={(v) => { setStatusOpen(v); if (!v) setActiveLotId(undefined); }}
         lots={lots}
         defaultLotId={activeLotId}
+        onStatusUpdated={handleStatusUpdated}
       />
+      {editLot && (
+        <FormEditLot
+          open={editLotOpen}
+          onOpenChange={(v) => { setEditLotOpen(v); if (!v) setEditLot(null); }}
+          lot={editLot}
+          onUpdated={handleLotUpdated}
+          onDeleted={handleLotDeleted}
+        />
+      )}
     </div>
   );
 }
