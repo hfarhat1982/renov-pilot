@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -80,6 +80,9 @@ export function FormAddLot({ open, onOpenChange, projectId, onCreated }: FormAdd
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Ajouter un lot travaux</DialogTitle>
+          <DialogDescription className="sr-only">
+            Formulaire de création d'un lot travaux pour le projet courant.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4">
