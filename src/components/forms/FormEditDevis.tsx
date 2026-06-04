@@ -100,6 +100,11 @@ export function FormEditDevis({
       const wasRetained = quote.isRetained;
       const becomesRetained = fields.isRetained;
 
+      // If becoming retained, clear others first (avoids unique constraint 409)
+      if (!wasRetained && becomesRetained) {
+        await setRetainedQuote(fields.lotId, quote.id);
+      }
+
       const updated = await updateQuote(quote.id, {
         lotId: fields.lotId,
         artisanId: selectedArtisan ? fields.artisanId : null,
@@ -108,13 +113,10 @@ export function FormEditDevis({
           : fields.artisanNameFree.trim(),
         amountEur: parseFloat(fields.amount),
         quoteDate: fields.date || null,
-        isRetained: fields.isRetained,
+        // setRetainedQuote already handled is_retained; only pass it for other cases
+        isRetained: becomesRetained,
         comment: fields.comment.trim(),
       });
-
-      if (!wasRetained && becomesRetained) {
-        await setRetainedQuote(fields.lotId, quote.id);
-      }
 
       toast.success("Devis mis à jour.");
       onUpdated?.(updated);
