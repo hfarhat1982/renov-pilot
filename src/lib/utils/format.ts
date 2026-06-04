@@ -7,7 +7,8 @@ export function formatEUR(value: number | null | undefined): string {
   }).format(value);
 }
 
-export function formatDate(value: string): string {
+export function formatDate(value: string | null | undefined): string {
+  if (!value) return "—";
   return new Date(value).toLocaleDateString("fr-FR", {
     day: "2-digit",
     month: "short",
