@@ -1,7 +1,7 @@
 import type { Quote } from "@/lib/types";
 import { supabase } from "@/lib/supabase/client";
 import { getCurrentUser } from "@/lib/services/auth";
-import type { Tables } from "@/lib/supabase/types";
+import type { Tables, TablesUpdate } from "@/lib/supabase/types";
 
 function toQuote(row: Tables<"quotes">): Quote {
   return {
@@ -87,4 +87,55 @@ export async function createQuote(input: {
     .single();
   if (error) throw error;
   return toQuote(data);
+}
+
+export async function updateQuote(
+  id: string,
+  input: {
+    lotId?: string;
+    artisanId?: string | null;
+    artisanName?: string;
+    amountEur?: number;
+    quoteDate?: string | null;
+    isRetained?: boolean;
+    comment?: string;
+  },
+): Promise<Quote> {
+  const patch: TablesUpdate<"quotes"> = {};
+  if (input.lotId !== undefined) patch.lot_id = input.lotId;
+  if (input.artisanId !== undefined) patch.artisan_id = input.artisanId;
+  if (input.artisanName !== undefined) patch.artisan_name = input.artisanName;
+  if (input.amountEur !== undefined) patch.amount_cents = Math.round(input.amountEur * 100);
+  if (input.quoteDate !== undefined) patch.quote_date = input.quoteDate;
+  if (input.isRetained !== undefined) patch.is_retained = input.isRetained;
+  if (input.comment !== undefined) patch.comment = input.comment;
+
+  const { data, error } = await supabase
+    .from("quotes")
+    .update(patch)
+    .eq("id", id)
+    .select()
+    .single();
+  if (error) throw error;
+  return toQuote(data);
+}
+
+export async function deleteQuote(id: string): Promise<void> {
+  const { error } = await supabase.from("quotes").delete().eq("id", id);
+  if (error) throw error;
+}
+
+export async function setRetainedQuote(lotId: string, quoteId: string): Promise<void> {
+  const { error: clearError } = await supabase
+    .from("quotes")
+    .update({ is_retained: false })
+    .eq("lot_id", lotId)
+    .neq("id", quoteId);
+  if (clearError) throw clearError;
+
+  const { error: setError } = await supabase
+    .from("quotes")
+    .update({ is_retained: true })
+    .eq("id", quoteId);
+  if (setError) throw setError;
 }

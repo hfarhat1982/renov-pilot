@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/PageHeader";
 import { StatCard } from "@/components/StatCard";
 import { StatusPill } from "@/components/StatusBadges";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table, TableBody, TableCell, TableFooter,
@@ -19,9 +20,11 @@ import type { BudgetRiskLevel } from "@/lib/mockData";
 import { getBudgetScenarioStats } from "@/lib/mock/stats";
 import { getProjectById, getProjectStats } from "@/lib/services/projects";
 import { getLotsByProject } from "@/lib/services/lots";
+import { getQuotesByProject } from "@/lib/services/quotes";
 import { FormAddDevis } from "@/components/forms/FormAddDevis";
+import { FormEditDevis } from "@/components/forms/FormEditDevis";
 import { FormLotScenario } from "@/components/forms/FormLotScenario";
-import type { Project, Lot } from "@/lib/types";
+import type { Project, Lot, Quote } from "@/lib/types";
 
 export const Route = createFileRoute("/_app/projets/$id/budget")({
   head: () => ({ meta: [{ title: "Budget — RenoV Pilot" }] }),
@@ -43,7 +46,7 @@ function fmtScenario(v: number | null): string {
 }
 
 type Stats = Awaited<ReturnType<typeof getProjectStats>>;
-type Data = { project: Project; lots: Lot[]; stats: Stats };
+type Data = { project: Project; lots: Lot[]; stats: Stats; quotes: Quote[] };
 
 function BudgetPage() {
   const { id } = Route.useParams();
@@ -52,14 +55,20 @@ function BudgetPage() {
   const [scenarioOpen, setScenarioOpen] = useState(false);
   const [activeLotId, setActiveLotId] = useState<string | undefined>();
   const [refreshKey, setRefreshKey] = useState(0);
+  const [editDevisOpen, setEditDevisOpen] = useState(false);
+  const [editDevis, setEditDevis] = useState<Quote | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     getProjectById(id).then(async (project) => {
       if (cancelled) return;
       if (!project) { setData("not-found"); return; }
-      const [lots, stats] = await Promise.all([getLotsByProject(project.id), getProjectStats(project.id)]);
-      if (!cancelled) setData({ project, lots, stats });
+      const [lots, stats, quotes] = await Promise.all([
+        getLotsByProject(project.id),
+        getProjectStats(project.id),
+        getQuotesByProject(project.id),
+      ]);
+      if (!cancelled) setData({ project, lots, stats, quotes });
     });
     return () => { cancelled = true; };
   }, [id, refreshKey]);
@@ -67,7 +76,7 @@ function BudgetPage() {
   if (data === "not-found") return <div className="py-12 text-center text-muted-foreground">Projet introuvable.</div>;
   if (!data) return <Spinner />;
 
-  const { project, lots: projectLots, stats } = data;
+  const { project, lots: projectLots, stats, quotes } = data;
   const scenarioStats = getBudgetScenarioStats(projectLots, RESERVE, project.budgetTarget);
   const {
     optimisticTotal, retainedTotal, pessimisticTotal,
@@ -77,6 +86,19 @@ function BudgetPage() {
   const totalQuoteMin = projectLots.reduce((s, l) => s + (l.quoteReceived ?? 0), 0);
   const totalReal = projectLots.reduce((s, l) => s + (l.realCost ?? 0), 0);
   const openScenario = (lotId: string) => { setActiveLotId(lotId); setScenarioOpen(true); };
+  const openEditDevis = (quote: Quote) => { setEditDevis(quote); setEditDevisOpen(true); };
+  const handleDevisUpdated = (updated: Quote) => {
+    setData((d) => d && d !== "not-found"
+      ? { ...d, quotes: d.quotes.map((q) => q.id === updated.id ? updated : q) }
+      : d);
+    setRefreshKey((k) => k + 1);
+  };
+  const handleDevisDeleted = (quoteId: string) => {
+    setData((d) => d && d !== "not-found"
+      ? { ...d, quotes: d.quotes.filter((q) => q.id !== quoteId) }
+      : d);
+    setRefreshKey((k) => k + 1);
+  };
 
   return (
     <div className="space-y-6">
@@ -190,6 +212,75 @@ function BudgetPage() {
         </Card>
       )}
 
+      {/* Devis reçus */}
+      <Card className="border-border/60 shadow-sm">
+        <CardHeader className="pb-3"><CardTitle className="text-base">Devis reçus</CardTitle></CardHeader>
+        <CardContent className="p-0">
+          {quotes.length === 0 ? (
+            <p className="px-4 py-6 text-center text-sm text-muted-foreground">
+              Aucun devis enregistré pour ce projet.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="min-w-[140px]">Lot</TableHead>
+                    <TableHead>Artisan</TableHead>
+                    <TableHead className="text-right">Montant HT</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead className="w-10" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {[...quotes]
+                    .sort((a, b) => {
+                      const lotA = projectLots.findIndex((l) => l.id === a.lotId);
+                      const lotB = projectLots.findIndex((l) => l.id === b.lotId);
+                      if (lotA !== lotB) return lotA - lotB;
+                      return (b.quoteDate ?? "").localeCompare(a.quoteDate ?? "");
+                    })
+                    .map((q) => (
+                      <TableRow key={q.id}>
+                        <TableCell className="font-medium">
+                          {projectLots.find((l) => l.id === q.lotId)?.name ?? "—"}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{q.artisanName || "—"}</TableCell>
+                        <TableCell className="text-right tabular-nums font-medium">{formatEUR(q.amount)}</TableCell>
+                        <TableCell className="text-muted-foreground text-sm">
+                          {q.quoteDate
+                            ? new Date(q.quoteDate).toLocaleDateString("fr-FR")
+                            : "—"}
+                        </TableCell>
+                        <TableCell>
+                          {q.isRetained ? (
+                            <Badge variant="default" className="bg-success text-success-foreground">
+                              Retenu
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="p-1.5">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => openEditDevis(q)}
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <FormAddDevis
         open={devisOpen}
         onOpenChange={setDevisOpen}
@@ -197,6 +288,17 @@ function BudgetPage() {
         projectId={id}
         onCreated={() => setRefreshKey((k) => k + 1)}
       />
+      {editDevis && (
+        <FormEditDevis
+          open={editDevisOpen}
+          onOpenChange={(v) => { setEditDevisOpen(v); if (!v) setEditDevis(null); }}
+          quote={editDevis}
+          lots={projectLots}
+          projectId={id}
+          onUpdated={handleDevisUpdated}
+          onDeleted={handleDevisDeleted}
+        />
+      )}
       <FormLotScenario open={scenarioOpen} onOpenChange={(v) => { setScenarioOpen(v); if (!v) setActiveLotId(undefined); }} lots={projectLots} defaultLotId={activeLotId} />
     </div>
   );
