@@ -189,7 +189,12 @@ function LotsPage() {
         projectId={id}
         onCreated={handleLotCreated}
       />
-      <FormAddDevis open={devisOpen} onOpenChange={setDevisOpen} lots={lots} />
+      <FormAddDevis
+        open={devisOpen}
+        onOpenChange={setDevisOpen}
+        lots={lots}
+        projectId={id}
+      />
       <FormLotStatus
         open={statusOpen}
         onOpenChange={(v) => { setStatusOpen(v); if (!v) setActiveLotId(undefined); }}

@@ -51,6 +51,7 @@ function BudgetPage() {
   const [devisOpen, setDevisOpen] = useState(false);
   const [scenarioOpen, setScenarioOpen] = useState(false);
   const [activeLotId, setActiveLotId] = useState<string | undefined>();
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -61,7 +62,7 @@ function BudgetPage() {
       if (!cancelled) setData({ project, lots, stats });
     });
     return () => { cancelled = true; };
-  }, [id]);
+  }, [id, refreshKey]);
 
   if (data === "not-found") return <div className="py-12 text-center text-muted-foreground">Projet introuvable.</div>;
   if (!data) return <Spinner />;
@@ -189,7 +190,13 @@ function BudgetPage() {
         </Card>
       )}
 
-      <FormAddDevis open={devisOpen} onOpenChange={setDevisOpen} lots={projectLots} />
+      <FormAddDevis
+        open={devisOpen}
+        onOpenChange={setDevisOpen}
+        lots={projectLots}
+        projectId={id}
+        onCreated={() => setRefreshKey((k) => k + 1)}
+      />
       <FormLotScenario open={scenarioOpen} onOpenChange={(v) => { setScenarioOpen(v); if (!v) setActiveLotId(undefined); }} lots={projectLots} defaultLotId={activeLotId} />
     </div>
   );
