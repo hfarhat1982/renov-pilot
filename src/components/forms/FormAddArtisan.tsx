@@ -28,6 +28,7 @@ const defaultState = {
   email: "",
   notes: "",
   trust_rating: "3",
+  status: "a_contacter" as string,
 };
 
 export function FormAddArtisan({ open, onOpenChange, projectId, onCreated }: FormAddArtisanProps) {
@@ -50,6 +51,7 @@ export function FormAddArtisan({ open, onOpenChange, projectId, onCreated }: For
         notes: fields.notes.trim() || undefined,
         trust_rating: Number(fields.trust_rating),
         project_id: projectId,
+        status: fields.status as import("@/lib/types").ArtisanStatus,
       });
       toast.success("Artisan ajouté.");
       onCreated?.(artisan);
@@ -114,6 +116,25 @@ export function FormAddArtisan({ open, onOpenChange, projectId, onCreated }: For
                 onChange={set("email")}
               />
             </div>
+          </div>
+
+          <div className="grid gap-1.5">
+            <Label>Statut</Label>
+            <Select
+              value={fields.status}
+              onValueChange={(v) => setFields((f) => ({ ...f, status: v }))}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="a_contacter">À contacter</SelectItem>
+                <SelectItem value="contacte">Contacté</SelectItem>
+                <SelectItem value="devis_recu">Devis reçu</SelectItem>
+                <SelectItem value="retenu">Retenu</SelectItem>
+                <SelectItem value="ecarte">Écarté</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid gap-1.5">

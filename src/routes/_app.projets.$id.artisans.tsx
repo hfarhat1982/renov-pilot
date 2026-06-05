@@ -3,13 +3,14 @@ import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArtisanStatusBadge } from "@/components/StatusBadges";
-import { Phone, Mail, Star, Plus } from "lucide-react";
+import { Phone, Mail, Star, Plus, Pencil } from "lucide-react";
 import { formatEUR } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { getProjectById } from "@/lib/services/projects";
 import { getArtisansByProject } from "@/lib/services/artisans";
 import { FormAddArtisan } from "@/components/forms/FormAddArtisan";
+import { FormEditArtisan } from "@/components/forms/FormEditArtisan";
 import type { Artisan } from "@/lib/types";
 
 export const Route = createFileRoute("/_app/projets/$id/artisans")({
@@ -38,6 +39,7 @@ function ArtisansPage() {
   const [artisans, setArtisans] = useState<Artisan[] | null | "not-found">(null);
   const [addOpen, setAddOpen] = useState(false);
   const [projectId, setProjectId] = useState<string | null>(null);
+  const [editArtisan, setEditArtisan] = useState<Artisan | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -73,11 +75,22 @@ function ArtisansPage() {
             <Card key={a.id} className="border-border/60 shadow-sm">
               <CardContent className="space-y-3 p-5">
                 <div className="flex items-start justify-between gap-2">
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <p className="font-semibold leading-tight">{a.name}</p>
                     <p className="text-xs text-muted-foreground">{a.trade}</p>
                   </div>
-                  <ArtisanStatusBadge status={a.status} />
+                  <div className="flex items-center gap-1 shrink-0">
+                    <ArtisanStatusBadge status={a.status} />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => setEditArtisan(a)}
+                      aria-label="Modifier l'artisan"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
                 </div>
                 <div className="space-y-1.5 text-sm">
                   <a href={`tel:${a.phone}`} className="flex items-center gap-2 text-muted-foreground hover:text-foreground">
@@ -104,6 +117,24 @@ function ArtisansPage() {
           onOpenChange={setAddOpen}
           projectId={projectId}
           onCreated={(a) => setArtisans((prev) => (Array.isArray(prev) ? [...prev, a] : [a]))}
+        />
+      )}
+      {editArtisan && (
+        <FormEditArtisan
+          open={!!editArtisan}
+          onOpenChange={(v) => { if (!v) setEditArtisan(null); }}
+          artisan={editArtisan}
+          onUpdated={(updated) => {
+            setArtisans((prev) =>
+              Array.isArray(prev) ? prev.map((a) => a.id === updated.id ? updated : a) : prev,
+            );
+            setEditArtisan(null);
+          }}
+          onDeleted={(artisanId) => {
+            setArtisans((prev) =>
+              Array.isArray(prev) ? prev.filter((a) => a.id !== artisanId) : prev,
+            );
+          }}
         />
       )}
     </div>
