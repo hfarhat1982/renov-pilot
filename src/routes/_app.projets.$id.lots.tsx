@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { LotStatusBadge, PriorityBadge } from "@/components/StatusBadges";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, Wand2 } from "lucide-react";
 import { formatEUR } from "@/lib/mockData";
 import { getProjectById } from "@/lib/services/projects";
 import { getLotsByProject } from "@/lib/services/lots";
@@ -18,6 +18,7 @@ import { FormAddDevis } from "@/components/forms/FormAddDevis";
 import { FormAddLot } from "@/components/forms/FormAddLot";
 import { FormLotStatus } from "@/components/forms/FormLotStatus";
 import { FormEditLot } from "@/components/forms/FormEditLot";
+import { FormGenerateTemplate } from "@/components/forms/FormGenerateTemplate";
 import type { Lot, LotStatus, Artisan } from "@/lib/types";
 
 export const Route = createFileRoute("/_app/projets/$id/lots")({
@@ -43,6 +44,7 @@ function LotsPage() {
   const [activeLotId, setActiveLotId] = useState<string | undefined>();
   const [editLotOpen, setEditLotOpen] = useState(false);
   const [editLot, setEditLot] = useState<Lot | null>(null);
+  const [templateOpen, setTemplateOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -89,6 +91,9 @@ function LotsPage() {
             </Button>
             <Button size="sm" variant="outline" onClick={() => setDevisOpen(true)}>
               <Plus className="mr-1 h-4 w-4" />Ajouter devis
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => setTemplateOpen(true)} title="Générer les lots de base">
+              <Wand2 className="mr-1 h-4 w-4" />Template
             </Button>
           </div>
         }
@@ -211,6 +216,19 @@ function LotsPage() {
           onDeleted={handleLotDeleted}
         />
       )}
+      <FormGenerateTemplate
+        open={templateOpen}
+        onOpenChange={setTemplateOpen}
+        projectId={id}
+        existingLotNames={lots.map((l) => l.name)}
+        onLotsCreated={(newLots) =>
+          setData((d) =>
+            d && d !== "not-found"
+              ? { ...d, lots: [...d.lots, ...newLots] }
+              : d,
+          )
+        }
+      />
     </div>
   );
 }
