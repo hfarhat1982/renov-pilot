@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusPill } from "@/components/StatusBadges";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { formatEUR, projectStatusLabel } from "@/lib/mockData";
 import { getSupabaseProjectsOnly } from "@/lib/services/projects";
@@ -54,6 +54,7 @@ function ProjectsList() {
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Nouveau projet</DialogTitle>
+          <DialogDescription>Créez un nouveau projet de rénovation.</DialogDescription>
         </DialogHeader>
         <FormCreateProject compact onSuccess={handleProjectCreated} />
       </DialogContent>

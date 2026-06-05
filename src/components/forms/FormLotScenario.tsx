@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -81,6 +82,7 @@ export function FormLotScenario({ open, onOpenChange, lots, defaultLotId }: Form
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Modifier le scénario budgétaire</DialogTitle>
+          <DialogDescription>Ajustez les estimations optimiste, retenue et pessimiste pour ce lot.</DialogDescription>
         </DialogHeader>
 
         <div className="rounded-md bg-secondary/60 px-3 py-2 text-xs text-muted-foreground">

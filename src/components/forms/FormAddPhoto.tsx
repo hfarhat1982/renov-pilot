@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -66,6 +67,7 @@ export function FormAddPhoto({ open, onOpenChange, lots }: FormAddPhotoProps) {
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Ajouter un document ou une photo</DialogTitle>
+          <DialogDescription>Joignez un document ou une photo au chantier.</DialogDescription>
         </DialogHeader>
 
         <div className="rounded-md bg-secondary/60 px-3 py-2 text-xs text-muted-foreground">

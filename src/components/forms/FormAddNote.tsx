@@ -3,6 +3,7 @@ import { useRouter } from "@tanstack/react-router";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -73,6 +74,7 @@ export function FormAddNote({ open, onOpenChange, projectId }: FormAddNoteProps)
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Ajouter une note</DialogTitle>
+          <DialogDescription>Enregistrez une note, une décision ou une alerte pour ce projet.</DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4">

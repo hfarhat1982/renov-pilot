@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "@tanstack/react-router";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -72,6 +72,7 @@ export function FormAddArtisan({ open, onOpenChange, projectId, onCreated }: For
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Ajouter un artisan</DialogTitle>
+          <DialogDescription>Renseignez les informations de l'artisan à ajouter au projet.</DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4">
