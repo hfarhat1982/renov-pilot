@@ -6,7 +6,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatusPill, PriorityBadge } from "@/components/StatusBadges";
 import {
   CheckCircle2, AlertTriangle, StickyNote,
-  Wallet, CalendarDays, Paperclip, Plus, Camera,
+  Wallet, CalendarDays, Paperclip, Plus, Camera, Pencil,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -19,6 +19,7 @@ import { getDecisionsByProject } from "@/lib/services/decisions";
 import { getNotesByProject } from "@/lib/services/notes";
 import { getLotsByProject } from "@/lib/services/lots";
 import { FormAddDecision } from "@/components/forms/FormAddDecision";
+import { FormEditDecision } from "@/components/forms/FormEditDecision";
 import { FormAddPhoto } from "@/components/forms/FormAddPhoto";
 import { FormAddNote } from "@/components/forms/FormAddNote";
 import type { Project, Lot, Decision } from "@/lib/types";
@@ -60,6 +61,7 @@ function JournalPage() {
   const [decisionOpen, setDecisionOpen] = useState(false);
   const [photoOpen, setPhotoOpen] = useState(false);
   const [noteOpen, setNoteOpen] = useState(false);
+  const [editDecision, setEditDecision] = useState<Decision | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -137,9 +139,18 @@ function JournalPage() {
                     <p className="font-semibold leading-snug">{d.title}</p>
                     <p className="text-xs text-muted-foreground">{d.decisionDate ? formatDate(d.decisionDate) : "Pas encore tranchée"}</p>
                   </div>
-                  <div className="flex shrink-0 flex-wrap gap-2">
+                  <div className="flex shrink-0 flex-wrap items-center gap-2">
                     <PriorityBadge priority={d.priority} />
                     <StatusPill tone={statusTone[d.status]}>{decisionStatusLabel[d.status]}</StatusPill>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => setEditDecision(d)}
+                      aria-label="Modifier la décision"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground">{d.context}</p>
@@ -200,7 +211,40 @@ function JournalPage() {
         </div>
       )}
 
-      <FormAddDecision open={decisionOpen} onOpenChange={setDecisionOpen} />
+      <FormAddDecision
+        open={decisionOpen}
+        onOpenChange={setDecisionOpen}
+        projectId={project.id}
+        onCreated={(d) =>
+          setData((prev) =>
+            prev && prev !== "not-found"
+              ? { ...prev, decisions: [d, ...prev.decisions] }
+              : prev,
+          )
+        }
+      />
+      {editDecision && (
+        <FormEditDecision
+          open={!!editDecision}
+          onOpenChange={(v) => { if (!v) setEditDecision(null); }}
+          decision={editDecision}
+          onUpdated={(updated) => {
+            setData((prev) =>
+              prev && prev !== "not-found"
+                ? { ...prev, decisions: prev.decisions.map((d) => d.id === updated.id ? updated : d) }
+                : prev,
+            );
+            setEditDecision(null);
+          }}
+          onDeleted={(decisionId) => {
+            setData((prev) =>
+              prev && prev !== "not-found"
+                ? { ...prev, decisions: prev.decisions.filter((d) => d.id !== decisionId) }
+                : prev,
+            );
+          }}
+        />
+      )}
       <FormAddNote open={noteOpen} onOpenChange={setNoteOpen} projectId={project.id} />
       <FormAddPhoto open={photoOpen} onOpenChange={setPhotoOpen} lots={lots} />
     </div>

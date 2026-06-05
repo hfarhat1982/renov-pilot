@@ -1,7 +1,8 @@
-import type { Decision } from "@/lib/types";
+import type { Decision, DecisionStatus, Priority } from "@/lib/types";
 import { decisions as mockDecisions } from "@/lib/mock/data";
 import { supabase } from "@/lib/supabase/client";
-import type { Tables } from "@/lib/supabase/types";
+import { getCurrentUser } from "@/lib/services/auth";
+import type { Tables, TablesUpdate } from "@/lib/supabase/types";
 
 function toDecision(row: Tables<"decisions">): Decision {
   return {
@@ -49,4 +50,85 @@ export async function getDecisionById(decisionId: string): Promise<Decision | un
     .maybeSingle();
   if (error || !data) return mockDecisions.find((d) => d.id === decisionId);
   return toDecision(data);
+}
+
+export async function createDecision(input: {
+  projectId: string;
+  title: string;
+  context?: string;
+  options?: string[];
+  selectedOption?: string | null;
+  status?: DecisionStatus;
+  priority?: Priority;
+  budgetImpact?: number | null;
+  planningImpactDays?: number | null;
+  decisionDate?: string | null;
+  notes?: string;
+}): Promise<Decision> {
+  const user = await getCurrentUser();
+  if (!user) throw new Error("Non authentifié");
+  const { data, error } = await supabase
+    .from("decisions")
+    .insert({
+      project_id: input.projectId,
+      owner_id: user.id,
+      title: input.title,
+      context: input.context ?? "",
+      options: input.options ?? [],
+      selected_option: input.selectedOption ?? null,
+      status: input.status ?? "a_trancher",
+      priority: input.priority ?? "moyenne",
+      budget_impact_cents: input.budgetImpact != null ? Math.round(input.budgetImpact * 100) : null,
+      planning_impact_days: input.planningImpactDays ?? null,
+      decision_date: input.decisionDate ?? null,
+      notes: input.notes ?? null,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return toDecision(data);
+}
+
+export async function updateDecision(
+  id: string,
+  input: {
+    title?: string;
+    context?: string;
+    options?: string[];
+    selectedOption?: string | null;
+    status?: DecisionStatus;
+    priority?: Priority;
+    budgetImpact?: number | null;
+    planningImpactDays?: number | null;
+    decisionDate?: string | null;
+    notes?: string;
+  },
+): Promise<Decision> {
+  const patch: TablesUpdate<"decisions"> = {};
+  if (input.title !== undefined) patch.title = input.title;
+  if (input.context !== undefined) patch.context = input.context;
+  if (input.options !== undefined) patch.options = input.options;
+  if (input.selectedOption !== undefined) patch.selected_option = input.selectedOption;
+  if (input.status !== undefined) patch.status = input.status;
+  if (input.priority !== undefined) patch.priority = input.priority;
+  if (input.budgetImpact !== undefined) {
+    patch.budget_impact_cents = input.budgetImpact != null ? Math.round(input.budgetImpact * 100) : null;
+  }
+  if (input.planningImpactDays !== undefined) patch.planning_impact_days = input.planningImpactDays;
+  if (input.decisionDate !== undefined) patch.decision_date = input.decisionDate;
+  if (input.notes !== undefined) patch.notes = input.notes;
+
+  const { data, error } = await supabase
+    .from("decisions")
+    .update(patch)
+    .eq("id", id)
+    .select()
+    .single();
+  if (error) throw error;
+  return toDecision(data);
+}
+
+export async function deleteDecision(id: string): Promise<void> {
+  const { error } = await supabase.from("decisions").delete().eq("id", id);
+  if (error) throw error;
 }

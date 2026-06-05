@@ -1,29 +1,24 @@
 import { useState } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Plus, X } from "lucide-react";
 import { toast } from "sonner";
-import type { DecisionStatus } from "@/lib/types";
+import { createDecision } from "@/lib/services/decisions";
+import type { Decision, DecisionStatus, Priority } from "@/lib/types";
 
 interface FormAddDecisionProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  projectId?: string;
+  onCreated?: (decision: Decision) => void;
 }
 
 const defaultState = {
@@ -32,12 +27,15 @@ const defaultState = {
   options: ["", ""],
   selectedOption: "",
   status: "a_trancher" as DecisionStatus,
+  priority: "moyenne" as Priority,
   budgetImpact: "",
   planningDays: "",
+  notes: "",
 };
 
-export function FormAddDecision({ open, onOpenChange }: FormAddDecisionProps) {
+export function FormAddDecision({ open, onOpenChange, projectId, onCreated }: FormAddDecisionProps) {
   const [fields, setFields] = useState(defaultState);
+  const [loading, setLoading] = useState(false);
 
   const reset = () => setFields(defaultState);
 
@@ -52,28 +50,44 @@ export function FormAddDecision({ open, onOpenChange }: FormAddDecisionProps) {
   const removeOption = (i: number) =>
     setFields({ ...fields, options: fields.options.filter((_, idx) => idx !== i) });
 
-  const handleSubmit = () => {
-    toast.success("Décision ajoutée — sera persistée avec Supabase.");
-    reset();
-    onOpenChange(false);
+  const handleSubmit = async () => {
+    if (!projectId) {
+      toast.error("Projet non défini.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const cleanOptions = fields.options.map((o) => o.trim()).filter(Boolean);
+      const decision = await createDecision({
+        projectId,
+        title: fields.title.trim(),
+        context: fields.context.trim() || undefined,
+        options: cleanOptions,
+        selectedOption: fields.selectedOption.trim() || null,
+        status: fields.status,
+        priority: fields.priority,
+        budgetImpact: fields.budgetImpact ? Number(fields.budgetImpact) : null,
+        planningImpactDays: fields.planningDays ? Number(fields.planningDays) : null,
+        notes: fields.notes.trim() || undefined,
+      });
+      toast.success("Décision ajoutée.");
+      onCreated?.(decision);
+      reset();
+      onOpenChange(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur lors de l'ajout.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(v) => {
-        if (!v) reset();
-        onOpenChange(v);
-      }}
-    >
+    <Dialog open={open} onOpenChange={(v) => { if (!v) reset(); onOpenChange(v); }}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Ajouter une décision</DialogTitle>
+          <DialogDescription>Enregistrez une décision à prendre ou déjà tranchée.</DialogDescription>
         </DialogHeader>
-
-        <div className="rounded-md bg-secondary/60 px-3 py-2 text-xs text-muted-foreground">
-          Action simulée — sera persistée avec Supabase.
-        </div>
 
         <div className="grid gap-4">
           <div className="grid gap-1.5">
@@ -163,6 +177,26 @@ export function FormAddDecision({ open, onOpenChange }: FormAddDecisionProps) {
               </Select>
             </div>
             <div className="grid gap-1.5">
+              <Label>Priorité</Label>
+              <Select
+                value={fields.priority}
+                onValueChange={(v) => setFields({ ...fields, priority: v as Priority })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="critique">Critique</SelectItem>
+                  <SelectItem value="haute">Haute</SelectItem>
+                  <SelectItem value="moyenne">Moyenne</SelectItem>
+                  <SelectItem value="basse">Basse</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="grid gap-1.5">
               <Label htmlFor="dec-budget">Impact budget (€)</Label>
               <Input
                 id="dec-budget"
@@ -172,32 +206,36 @@ export function FormAddDecision({ open, onOpenChange }: FormAddDecisionProps) {
                 onChange={(e) => setFields({ ...fields, budgetImpact: e.target.value })}
               />
             </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="dec-planning">Impact planning (j)</Label>
+              <Input
+                id="dec-planning"
+                type="number"
+                placeholder="ex : 5"
+                value={fields.planningDays}
+                onChange={(e) => setFields({ ...fields, planningDays: e.target.value })}
+              />
+            </div>
           </div>
 
           <div className="grid gap-1.5">
-            <Label htmlFor="dec-planning">Impact planning (jours)</Label>
-            <Input
-              id="dec-planning"
-              type="number"
-              placeholder="ex : 5"
-              value={fields.planningDays}
-              onChange={(e) => setFields({ ...fields, planningDays: e.target.value })}
+            <Label htmlFor="dec-notes">Notes internes</Label>
+            <Textarea
+              id="dec-notes"
+              placeholder="Remarques, contraintes…"
+              value={fields.notes}
+              onChange={(e) => setFields({ ...fields, notes: e.target.value })}
+              rows={2}
             />
           </div>
         </div>
 
         <DialogFooter className="flex-col-reverse gap-2 sm:flex-row">
-          <Button
-            variant="outline"
-            onClick={() => {
-              reset();
-              onOpenChange(false);
-            }}
-          >
+          <Button variant="outline" onClick={() => { reset(); onOpenChange(false); }} disabled={loading}>
             Annuler
           </Button>
-          <Button onClick={handleSubmit} disabled={!fields.title.trim()}>
-            Ajouter la décision
+          <Button onClick={handleSubmit} disabled={!fields.title.trim() || loading}>
+            {loading ? "Enregistrement…" : "Ajouter la décision"}
           </Button>
         </DialogFooter>
       </DialogContent>
