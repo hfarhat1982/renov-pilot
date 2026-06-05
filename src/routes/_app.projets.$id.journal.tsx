@@ -245,7 +245,18 @@ function JournalPage() {
           }}
         />
       )}
-      <FormAddNote open={noteOpen} onOpenChange={setNoteOpen} projectId={project.id} />
+      <FormAddNote
+        open={noteOpen}
+        onOpenChange={setNoteOpen}
+        projectId={project.id}
+        onCreated={(note) =>
+          setData((prev) =>
+            prev && prev !== "not-found"
+              ? { ...prev, notes: [note, ...prev.notes] }
+              : prev,
+          )
+        }
+      />
       <FormAddPhoto open={photoOpen} onOpenChange={setPhotoOpen} lots={lots} />
     </div>
   );

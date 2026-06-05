@@ -27,6 +27,7 @@ interface FormAddNoteProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   projectId: string;
+  onCreated?: (note: Note) => void;
 }
 
 const defaultState = {
@@ -36,7 +37,7 @@ const defaultState = {
   priority: "moyenne" as Priority,
 };
 
-export function FormAddNote({ open, onOpenChange, projectId }: FormAddNoteProps) {
+export function FormAddNote({ open, onOpenChange, projectId, onCreated }: FormAddNoteProps) {
   const router = useRouter();
   const [fields, setFields] = useState(defaultState);
   const [loading, setLoading] = useState(false);
@@ -46,13 +47,14 @@ export function FormAddNote({ open, onOpenChange, projectId }: FormAddNoteProps)
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      await createNote({
+      const note = await createNote({
         title: fields.title,
         body: fields.body,
         note_type: fields.type,
         project_id: projectId,
       });
       toast.success("Note ajoutée.");
+      onCreated?.(note);
       reset();
       onOpenChange(false);
       router.invalidate();

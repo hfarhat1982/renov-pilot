@@ -199,6 +199,13 @@ function LotsPage() {
         onOpenChange={setDevisOpen}
         lots={lots}
         projectId={id}
+        onCreated={() => {
+          getLotsByProject(id).then((updatedLots) =>
+            setData((d) =>
+              d && d !== "not-found" ? { ...d, lots: updatedLots } : d,
+            ),
+          );
+        }}
       />
       <FormLotStatus
         open={statusOpen}
