@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import {
   Wallet, TrendingDown, TrendingUp, Gauge,
   AlertTriangle, CircleAlert, Info, ArrowRight, Plus,
+  CheckSquare, Clock, ListTodo, StickyNote,
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { StatCard } from "@/components/StatCard";
@@ -16,8 +17,9 @@ import { getLotsByProject } from "@/lib/services/lots";
 import { getTasksByProject } from "@/lib/services/tasks";
 import { getAlertsByProjectOnly } from "@/lib/services/alerts";
 import { getDecisionsByProject } from "@/lib/services/decisions";
+import { getNotesByProject } from "@/lib/services/notes";
 import { FormAddNote } from "@/components/forms/FormAddNote";
-import type { Project, Lot, Task, Alert, Decision } from "@/lib/types";
+import type { Project, Lot, Task, Alert, Decision, Note } from "@/lib/types";
 
 export const Route = createFileRoute("/_app/projets/$id/dashboard")({
   head: () => ({ meta: [{ title: "Tableau de bord — RenoV Pilot" }] }),
@@ -38,7 +40,7 @@ const alertTone = {
 } as const;
 
 type Stats = Awaited<ReturnType<typeof getProjectStats>>;
-type Data = { project: Project; stats: Stats; lots: Lot[]; tasks: Task[]; alerts: Alert[]; decisions: Decision[] };
+type Data = { project: Project; stats: Stats; lots: Lot[]; tasks: Task[]; alerts: Alert[]; decisions: Decision[]; notes: Note[] };
 
 function Dashboard() {
   const { id } = Route.useParams();
@@ -50,14 +52,15 @@ function Dashboard() {
     getProjectById(id).then(async (project) => {
       if (cancelled) return;
       if (!project) { setData("not-found"); return; }
-      const [stats, lots, tasks, alerts, decisions] = await Promise.all([
+      const [stats, lots, tasks, alerts, decisions, notes] = await Promise.all([
         getProjectStats(project.id),
         getLotsByProject(project.id),
         getTasksByProject(project.id),
         getAlertsByProjectOnly(project.id),
         getDecisionsByProject(project.id),
+        getNotesByProject(project.id),
       ]);
-      if (!cancelled) setData({ project, stats, lots, tasks, alerts, decisions });
+      if (!cancelled) setData({ project, stats, lots, tasks, alerts, decisions, notes });
     });
     return () => { cancelled = true; };
   }, [id]);
@@ -65,7 +68,8 @@ function Dashboard() {
   if (data === "not-found") return <div className="py-12 text-center text-muted-foreground">Projet introuvable.</div>;
   if (!data) return <Spinner />;
 
-  const { project, stats, lots, tasks, alerts, decisions } = data;
+  const { project, stats, lots, tasks, alerts, decisions, notes } = data;
+  const today = new Date().toISOString().split("T")[0];
   const priorityOrder = { critique: 0, haute: 1, moyenne: 2, basse: 3 } as const;
   const urgentDecisions = decisions
     .filter((d) => d.status === "a_trancher")
@@ -76,6 +80,25 @@ function Dashboard() {
     .filter((t) => t.status !== "termine")
     .sort((a, b) => a.dueDate.localeCompare(b.dueDate))
     .slice(0, 5);
+
+  // KPIs tâches
+  const tasksTotal = tasks.length;
+  const tasksTodo = tasks.filter((t) => t.status === "a_faire").length;
+  const tasksInProgress = tasks.filter((t) => t.status === "en_cours").length;
+  const tasksDone = tasks.filter((t) => t.status === "termine").length;
+  const tasksLate = tasks.filter(
+    (t) => t.status !== "termine" && t.dueDate && t.dueDate < today,
+  ).length;
+
+  // Dernières notes (5 max)
+  const recentNotes = [...notes]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 5);
+
+  // Alertes calculées
+  const isBudgetOverrun = stats.remaining < 0;
+  const hasLateTasks = tasksLate > 0;
+  const hasBlockedLots = lots.some((l) => l.status === "bloque");
 
   return (
     <div className="space-y-6">
@@ -107,6 +130,40 @@ function Dashboard() {
         <CardHeader className="pb-3"><CardTitle className="text-base">Avancement global</CardTitle></CardHeader>
         <CardContent><Progress value={stats.progress} className="h-2" /></CardContent>
       </Card>
+
+      {/* Alertes calculées */}
+      {(isBudgetOverrun || hasLateTasks || hasBlockedLots) && (
+        <div className="space-y-2">
+          {isBudgetOverrun && (
+            <div className="flex items-center gap-3 rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-sm">
+              <CircleAlert className="h-4 w-4 shrink-0 text-destructive" />
+              <span>Budget dépassé de <span className="font-medium text-destructive">{formatEUR(Math.abs(stats.remaining))}</span></span>
+            </div>
+          )}
+          {hasLateTasks && (
+            <div className="flex items-center gap-3 rounded-lg border border-warning/40 bg-warning/5 p-3 text-sm">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-warning-foreground" />
+              <span><span className="font-medium">{tasksLate}</span> tâche{tasksLate > 1 ? "s" : ""} en retard</span>
+            </div>
+          )}
+          {hasBlockedLots && (
+            <div className="flex items-center gap-3 rounded-lg border border-warning/40 bg-warning/5 p-3 text-sm">
+              <AlertTriangle className="h-4 w-4 shrink-0 text-warning-foreground" />
+              <span>Des lots sont bloqués — vérifiez les lots travaux</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* KPIs tâches */}
+      {tasksTotal > 0 && (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <StatCard label="À faire" value={String(tasksTodo)} icon={<ListTodo className="h-4 w-4" />} />
+          <StatCard label="En cours" value={String(tasksInProgress)} icon={<Clock className="h-4 w-4" />} tone="info" />
+          <StatCard label="Terminées" value={String(tasksDone)} icon={<CheckSquare className="h-4 w-4" />} tone="success" />
+          <StatCard label="En retard" value={String(tasksLate)} icon={<AlertTriangle className="h-4 w-4" />} tone={tasksLate > 0 ? "danger" : "success"} />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card className="border-border/60 shadow-sm">
@@ -192,6 +249,31 @@ function Dashboard() {
           ))}
         </CardContent>
       </Card>
+
+      {recentNotes.length > 0 && (
+        <Card className="border-border/60 shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between pb-3">
+            <CardTitle className="text-base">Notes récentes</CardTitle>
+            <Button asChild variant="ghost" size="sm">
+              <Link to="/projets/$id/journal" params={{ id: project.id }}>Tout voir</Link>
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {recentNotes.map((n) => (
+              <div key={n.id} className="flex items-start gap-3 rounded-lg border border-border/60 p-3">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-secondary/60">
+                  <StickyNote className="h-3.5 w-3.5 text-muted-foreground" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{n.title}</p>
+                  <p className="line-clamp-1 text-xs text-muted-foreground">{n.body}</p>
+                  <p className="text-xs text-muted-foreground">{formatDate(n.date)} · {n.author}</p>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       <FormAddNote open={noteOpen} onOpenChange={setNoteOpen} projectId={project.id} />
     </div>
