@@ -12,4 +12,8 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Force Nitro to run on all build environments (including Vercel).
+  // Preset is controlled by NITRO_PRESET env var (set to "vercel" in Vercel project settings).
+  // Falls back to "cloudflare-module" locally if NITRO_PRESET is not set.
+  nitro: true,
 });
