@@ -36,7 +36,14 @@ function LoginPage() {
       setSuccess(true);
       setTimeout(() => navigate({ to: "/dashboard" }), 800);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur de connexion");
+      const msg = err instanceof Error ? err.message.toLowerCase() : "";
+      if (msg.includes("invalid") || msg.includes("credentials") || msg.includes("password") || msg.includes("email")) {
+        setError("Email ou mot de passe incorrect.");
+      } else if (msg.includes("network") || msg.includes("fetch") || msg.includes("unreachable") || msg.includes("failed")) {
+        setError("Connexion impossible pour le moment. Réessayez.");
+      } else {
+        setError("Email ou mot de passe incorrect.");
+      }
     } finally {
       setLoading(false);
     }
@@ -81,7 +88,7 @@ function LoginPage() {
           </div>
 
           {error && (
-            <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            <p role="alert" className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
               {error}
             </p>
           )}
